@@ -4,7 +4,7 @@
         xmlns:android = "http://schemas.android.com/apk/res/android"
         id        = "com.moodle.moodlemobile"
         versionCode = "2003"
-        version   = "1.0">
+        version   = "2.3">
     <name>Fate AVA mobile</name>
 
     <description>
