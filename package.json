@@ -49,7 +49,10 @@
     "cordova-plugin-local-notifications-mm"
   ],
   "cordovaPlatforms": [
-    "android",
+    {
+      "platform": "android",
+      "locator": "wp8"
+    },
     "ios"
   ]
 }

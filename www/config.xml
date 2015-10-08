@@ -21,6 +21,7 @@
 
     <gap:platform name="ios" />
     <gap:platform name="android" />
+	<gap:platform name="winphone" />
 
     <access origin="*" />
     <access origin="tel:*" launch-external="yes" />
@@ -59,7 +60,7 @@
     <icon src="resources/android/icon/drawable-mdpi-icon.png"       gap:platform="android"    gap:density="mdpi" />
     <icon src="resources/android/icon/drawable-hdpi-icon.png"       gap:platform="android"    gap:density="hdpi" />
     <icon src="resources/android/icon/drawable-xhdpi-icon.png"      gap:platform="android"    gap:density="xhdpi" />
-    <icon src="resources/android/icon/drawable-xxhdpi-icon.png"    gap:platform="android"    gap:density="xxhdpi" />
+    <icon src="resources/android/icon/drawable-xxhdpi-icon.png"     gap:platform="android"    gap:density="xxhdpi" />
     <icon src="resources/android/icon/drawable-xxxhdpi-icon.png"    gap:platform="android"    gap:density="xxhdpi" />
 
     <icon src="resources/ios/icon/icon-small.png"         gap:platform="ios"      width="29" height="29" />
@@ -77,6 +78,9 @@
     <icon src="resources/ios/icon/icon-76@2x.png"         gap:platform="ios"      width="152" height="152" />
     <icon src="resources/ios/icon/icon-57@2x.png"         gap:platform="ios"      width="114" height="114" />
     <icon src="resources/ios/icon/icon-72@2x.png"         gap:platform="ios"      width="144" height="144" />
+	
+	<icon src="resources\wp8\ApplicationIcon.png"		  gap:platform="winphone" width="99" height="99" />
+	<icon src="resources\wp8\Background.png" 			  gap:platform="winphone" width="159" height="159" gap:role="background" />
 
     <gap:splash src="splash.png" />
     <gap:splash src="resources/android/splash/drawable-land-ldpi-screen.png"      gap:platform="android" gap:qualifier="land-ldpi"/>
@@ -103,6 +107,8 @@
     <gap:splash src="resources/ios/splash/Default-Portrait~ipad.png"      gap:platform="ios" width="768" height="1024"/>
     <gap:splash src="resources/ios/splash/Default@2x~iphone.png"          gap:platform="ios" width="640" height="960"/>
     <gap:splash src="resources/ios/splash/Default~iphone.png"             gap:platform="ios" width="320" height="480"/>
+	
+	<gap:splash src="resources\wp8\splash\SplashScreenImage.png" 		  gap:platform="winphone" width="768" height="1280" />
 
     <gap:plugin name="cordova-plugin-camera" source="npm" />
     <gap:plugin name="cordova-plugin-media-capture" source="npm" />
