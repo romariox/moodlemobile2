@@ -1,8 +1,14 @@
 {
 <<<<<<< HEAD
+<<<<<<< HEAD
     "app_id" : "br.edu.fate.avamobile",
     "versioncode" : "2003",
     "versionname" : "2.3",
+=======
+    "app_id" : "com.moodle.moodlemobile",
+    "versioncode" : "2007",
+    "versionname" : "2.6",
+>>>>>>> refs/remotes/moodlehq/master
 =======
     "app_id" : "com.moodle.moodlemobile",
     "versioncode" : "2007",
