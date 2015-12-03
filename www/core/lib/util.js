@@ -70,14 +70,6 @@ angular.module('mm.core')
 
         var self = {}; // Use 'self' to be coherent with the rest of services.
 
-        // // Loading all the mimetypes.
-        var mimeTypes = {};
-        $http.get('core/assets/mimetypes.json').then(function(response) {
-            mimeTypes = response.data;
-        }, function() {
-            // It failed, never mind...
-        });
-
         /**
          * Formats a URL, trim, lowercase, etc...
          *
@@ -155,62 +147,6 @@ angular.module('mm.core')
                 throw new Error('Unexpected argument passed passed');
             }
             return resolved;
-        };
-
-        /**
-         * Returns the file extension of a file.
-         *
-         * When the file does not have an extension, it returns undefined.
-         *
-         * @module mm.core
-         * @ngdoc method
-         * @name $mmUtil#getFileExtension
-         * @param  {string} filename The file name.
-         * @return {string}          The lowercased extension, or undefined.
-         */
-        self.getFileExtension = function(filename) {
-            var dot = filename.lastIndexOf("."),
-                ext;
-
-            if (dot > -1) {
-                ext = filename.substr(dot + 1).toLowerCase();
-            }
-
-            return ext;
-        };
-
-        /**
-         * Get a file icon URL based on its file name.
-         *
-         * @module mm.core
-         * @ngdoc method
-         * @name $mmUtil#getFileIcon
-         * @param  {String} The name of the file.
-         * @return {String} The path to a file icon.
-         */
-        self.getFileIcon = function(filename) {
-            var ext = self.getFileExtension(filename),
-                icon;
-
-            if (ext && mimeTypes[ext] && mimeTypes[ext].icon) {
-                icon = mimeTypes[ext].icon + '-64.png';
-            } else {
-                icon = 'unknown-64.png';
-            }
-
-            return 'img/files/' + icon;
-        };
-
-        /**
-         * Get the folder icon URL.
-         *
-         * @module mm.core
-         * @ngdoc method
-         * @name $mmUtil#getFolderIcon
-         * @return {String} The path to a folder icon.
-         */
-        self.getFolderIcon = function() {
-            return 'img/files/folder-64.png';
         };
 
         /**
@@ -341,6 +277,7 @@ angular.module('mm.core')
          * @return {Void}
          */
         self.openFile = function(path) {
+            var deferred = $q.defer();
 
             if (false) {
                 // TODO Restore node-webkit support.
@@ -349,34 +286,37 @@ angular.module('mm.core')
                 // We use the node-webkit shell for open the file (pdf, doc) using the default application configured in the os.
                 // var gui = require('nw.gui');
                 // gui.Shell.openItem(path);
+                deferred.resolve();
 
             } else if (window.plugins) {
-                var extension = self.getFileExtension(path),
-                    mimetype;
-
-                if (extension && mimeTypes[extension]) {
-                    mimetype = mimeTypes[extension];
-                }
+                var extension = $mmFS.getFileExtension(path),
+                    mimetype = $mmFS.getMimeType(extension);
 
                 if (ionic.Platform.isAndroid() && window.plugins.webintent) {
                     var iParams = {
                         action: "android.intent.action.VIEW",
                         url: path,
-                        type: mimetype.type
+                        type: mimetype
                     };
 
                     window.plugins.webintent.startActivity(
                         iParams,
                         function() {
                             $log.debug('Intent launched');
+                            deferred.resolve();
                         },
                         function() {
-                            $log.debug('Intent launching failed');
+                            $log.debug('Intent launching failed.');
                             $log.debug('action: ' + iParams.action);
                             $log.debug('url: ' + iParams.url);
                             $log.debug('type: ' + iParams.type);
-                            // This may work in cordova 2.4 and onwards.
-                            window.open(path, '_system');
+
+                            if (!extension || extension.indexOf('/') > -1 || extension.indexOf('\\') > -1) {
+                                // Extension not found.
+                                $mmLang.translateAndRejectDeferred(deferred, 'mm.core.erroropenfilenoextension');
+                            } else {
+                                $mmLang.translateAndRejectDeferred(deferred, 'mm.core.erroropenfilenoapp');
+                            }
                         }
                     );
 
@@ -394,6 +334,7 @@ angular.module('mm.core')
                         handleDocumentWithURL(
                             function() {
                                 $log.debug('File opened with handleDocumentWithURL' + path);
+                                deferred.resolve();
                             },
                             function(error) {
                                 $log.debug('Error opening with handleDocumentWithURL' + path);
@@ -401,19 +342,24 @@ angular.module('mm.core')
                                     $log.error('No app that handles this file type.');
                                 }
                                 self.openInBrowser(path);
+                                deferred.resolve();
                             },
                             path
                         );
-                    });
+                    }, deferred.reject);
                 } else {
                     // Last try, launch the file with the browser.
                     self.openInBrowser(path);
+                    deferred.resolve();
                 }
             } else {
                 // Changing _blank for _system may work in cordova 2.4 and onwards.
                 $log.debug('Opening external file using window.open()');
                 window.open(path, '_blank');
+                deferred.resolve();
             }
+
+            return deferred.promise;
         };
 
         /**
@@ -429,6 +375,21 @@ angular.module('mm.core')
          */
         self.openInBrowser = function(url) {
             window.open(url, '_system');
+        };
+
+        /**
+         * Open a URL using InAppBrowser.
+         *
+         * Do not use for files, refer to {@link $mmUtil#openFile}.
+         *
+         * @module mm.core
+         * @ngdoc method
+         * @name $mmUtil#openInApp
+         * @param  {String} url The URL to open.
+         * @return {Void}
+         */
+        self.openInApp = function(url) {
+            window.open(url, '_blank');
         };
 
         /**
@@ -736,6 +697,44 @@ angular.module('mm.core')
          */
         self.emptyArray = function(array) {
             array.length = 0; // Empty array without losing its reference.
+        };
+
+        /**
+         * Similar to $q.all, but if a promise fails this function's promise won't be rejected until ALL promises have finished.
+         *
+         * @module mm.core
+         * @ngdoc method
+         * @name $mmUtil#allPromises
+         * @param  {Promise[]} promises Promises.
+         * @return {Promise}            Promise resolved if all promises are resolved and rejected if at least 1 promise fails.
+         */
+        self.allPromises = function(promises) {
+            if (!promises || !promises.length) {
+                return $q.when();
+            }
+
+            var count = 0,
+                failed = false,
+                deferred = $q.defer();
+
+            angular.forEach(promises, function(promise) {
+                promise.catch(function() {
+                    failed = true;
+                }).finally(function() {
+                    count++;
+
+                    if (count === promises.length) {
+                        // All promises have finished, reject/resolve.
+                        if (failed) {
+                            deferred.reject();
+                        } else {
+                            deferred.resolve();
+                        }
+                    }
+                });
+            });
+
+            return deferred.promise;
         };
 
         return self;

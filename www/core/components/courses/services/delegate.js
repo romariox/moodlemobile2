@@ -60,9 +60,23 @@ angular.module('mm.core.courses')
     self.$get = function($mmUtil, $q, $log, $mmSite) {
         var enabledNavHandlers = {},
             coursesHandlers = {},
-            self = {};
+            self = {},
+            loaded = {};
 
         $log = $log.getInstance('$mmCoursesDelegate');
+
+        /**
+         * Check if addons are loaded for a certain course.
+         *
+         * @module mm.core.courses
+         * @ngdoc method
+         * @name $mmCoursesDelegate#areNavHandlersLoadedFor
+         * @param {Number} courseId The course ID.
+         * @return {Boolean} True if addons are loaded, false otherwise.
+         */
+        self.areNavHandlersLoadedFor = function(courseId) {
+            return loaded[courseId];
+        };
 
         /**
          * Clear all courses handlers.
@@ -74,6 +88,7 @@ angular.module('mm.core.courses')
          */
         self.clearCoursesHandlers = function() {
             coursesHandlers = {};
+            loaded = {};
         };
 
         /**
@@ -83,10 +98,11 @@ angular.module('mm.core.courses')
          * @ngdoc method
          * @name $mmCoursesDelegate#getNavHandlersFor
          * @param {Number} courseId The course ID.
+         * @param {Boolean} refresh True if it should refresh the list.
          * @return {Array}          Array of objects containing 'priority' and 'controller'.
          */
-        self.getNavHandlersFor = function(courseId) {
-            if (typeof(coursesHandlers[courseId]) == 'undefined') {
+        self.getNavHandlersFor = function(courseId, refresh) {
+            if (typeof(coursesHandlers[courseId]) == 'undefined' || refresh) {
                 coursesHandlers[courseId] = [];
                 self.updateNavHandlersForCourse(courseId);
             }
@@ -159,7 +175,7 @@ angular.module('mm.core.courses')
             }).finally(function() {
                 // Update handlers for all courses.
                 angular.forEach(coursesHandlers, function(handler, courseId) {
-                    self.updateNavHandlersForCourse(courseId);
+                    self.updateNavHandlersForCourse(parseInt(courseId));
                 });
             });
         };
@@ -175,18 +191,14 @@ angular.module('mm.core.courses')
          * @protected
          */
         self.updateNavHandlersForCourse = function(courseId) {
-            var promises = [];
-
-            $mmUtil.emptyArray(coursesHandlers[courseId]);
+            var promises = [],
+                enabledForCourse = [];
 
             angular.forEach(enabledNavHandlers, function(handler) {
                 // Checks if the handler is enabled for the user.
                 var promise = $q.when(handler.instance.isEnabledForCourse(courseId)).then(function(enabled) {
                     if (enabled) {
-                        coursesHandlers[courseId].push({
-                            controller: handler.instance.getController(courseId),
-                            priority: handler.priority
-                        });
+                        enabledForCourse.push(handler);
                     } else {
                         return $q.reject();
                     }
@@ -201,6 +213,16 @@ angular.module('mm.core.courses')
             }).catch(function() {
                 // Never fails.
                 return true;
+            }).finally(function() {
+                // Update the coursesHandlers array with the new enabled addons.
+                $mmUtil.emptyArray(coursesHandlers[courseId]);
+                angular.forEach(enabledForCourse, function(handler) {
+                    coursesHandlers[courseId].push({
+                        controller: handler.instance.getController(courseId),
+                        priority: handler.priority
+                    });
+                });
+                loaded[courseId] = true;
             });
         };
 
