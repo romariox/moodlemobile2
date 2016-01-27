@@ -12,46 +12,47 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-angular.module('mm.addons.mod_forum')
+angular.module('mm.addons.mod_glossary')
 
 /**
- * Mod forum course content handler.
+ * Mod glossary course content handler.
  *
- * @module mm.addons.mod_forum
+ * @module mm.addons.mod_glossary
  * @ngdoc service
- * @name $mmaModForumCourseContentHandler
+ * @name $mmaModGlossaryCourseContentHandler
  */
-.factory('$mmaModForumCourseContentHandler', function($mmCourse, $mmaModForum, $state) {
+.factory('$mmaModGlossaryCourseContentHandler', function($mmCourse, $mmSite, $state) {
     var self = {};
 
     /**
      * Whether or not the module is enabled for the site.
      *
-     * @module mm.addons.mod_forum
+     * @module mm.addons.mod_glossary
      * @ngdoc method
-     * @name $mmaModForumCourseContentHandler#isEnabled
+     * @name $mmaModGlossaryCourseContentHandler#isEnabled
      * @return {Boolean}
      */
     self.isEnabled = function() {
-        return $mmaModForum.isPluginEnabled();
+        // This function was introduced along with all the other required ones.
+        return $mmSite.wsAvailable('mod_glossary_get_glossaries_by_courses');
     };
 
     /**
      * Get the controller.
      *
-     * @module mm.addons.mod_forum
+     * @module mm.addons.mod_glossary
      * @ngdoc method
-     * @name $mmaModForumCourseContentHandler#isEnabled
+     * @name $mmaModGlossaryCourseContentHandler#getController
      * @param {Object} module The module info.
      * @param {Number} courseid The course ID.
      * @return {Function}
      */
     self.getController = function(module, courseid) {
         return function($scope) {
+            $scope.icon = $mmCourse.getModuleIconSrc('glossary');
             $scope.title = module.name;
-            $scope.icon = $mmCourse.getModuleIconSrc('forum');
             $scope.action = function(e) {
-                $state.go('site.mod_forum', {module: module, courseid: courseid});
+                $state.go('site.mod_glossary', {module: module, courseid: courseid});
             };
         };
     };
