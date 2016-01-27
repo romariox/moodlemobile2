@@ -15,6 +15,7 @@
 angular.module('mm.core.course', ['mm.core.courses'])
 
 .constant('mmCoreCoursePriority', 800)
+.constant('mmCoreCourseAllSectionsId', -1)
 
 .config(function($stateProvider, $mmCoursesDelegateProvider, mmCoreCoursePriority) {
 
@@ -23,7 +24,7 @@ angular.module('mm.core.course', ['mm.core.courses'])
     .state('site.mm_course', {
         url: '/mm_course',
         params: {
-            course: null
+            courseid: null
         },
         views: {
             'site': {

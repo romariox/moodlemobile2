@@ -1,6 +1,7 @@
 {
     "about": "درباره",
     "cacheexpirationtime": "زمان اعتبار کشها (miliseconds)",
+    "currentlanguage": "زبان فعلی",
     "deletesitefiles": "آیا از حذف کلیه فایلهای این سایت مطمئنید؟",
     "development": "توسعه",
     "enabledebugging": "فعالسازی اشکالزدایی",
@@ -9,6 +10,7 @@
     "language": "زبان",
     "license": "اجازه‌نامه",
     "settings": "تنظیمات",
+    "sites": "سایت‌ها",
     "spaceusage": "فضای مورد استفاده",
     "success": "موفق",
     "total": "مجموع"

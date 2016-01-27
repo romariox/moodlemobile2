@@ -33,6 +33,9 @@
                             <i class="icon ion-ionic"></i>{{ 'mm.sidemenu.mycourses' | translate}}
                         </a>
                     </li>
+                    <li class="item text-center" ng-if="(!handlers || !handlers.length) && !areNavHandlersLoaded()">
+                        <ion-spinner></ion-spinner>
+                    </li>
                     <li ng-repeat="handler in handlers | orderBy:'-priority'" ng-controller="handler.controller" >
                         <a menu-close class="item item-icon-left" ui-sref="{{state}}" title="{{title | translate}}">
                             <i class="icon {{icon}}"></i> {{title | translate}}
@@ -55,8 +58,8 @@
                         </a>
                     <li>
                     </li>
-                        <a class="item item-icon-left" ng-click="logout()" title="{{ 'mm.sidemenu.logout' | translate}}">
-                            <i class="icon ion-log-out"></i>{{ 'mm.sidemenu.logout' | translate}}
+                        <a class="item item-icon-left" ng-click="logout()" title="{{ 'mm.sidemenu.changesite' | translate}}">
+                            <i class="icon ion-log-out"></i>{{ 'mm.sidemenu.changesite' | translate}}
                         </a>
                     </li>
                 </ul>

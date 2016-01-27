@@ -38,9 +38,10 @@ angular.module('mm.core')
  * @ngdoc service
  * @name $mmSitesManager
  */
-.factory('$mmSitesManager', function($http, $q, $mmSitesFactory, md5, $mmLang, $mmConfig, $mmApp, $mmUtil, $mmEvents, $state,
-            $translate, mmCoreSitesStore, mmCoreCurrentSiteStore, mmCoreEventLogin, mmCoreEventLogout, $log,
-            mmCoreEventSiteUpdated, mmCoreEventSiteAdded, mmCoreEventSessionExpired, mmCoreEventSiteDeleted) {
+.factory('$mmSitesManager', function($http, $q, $mmSitesFactory, md5, $mmLang, $mmApp, $mmUtil, $mmEvents, $state,
+            $translate, mmCoreSitesStore, mmCoreCurrentSiteStore, mmCoreEventLogin, mmCoreEventLogout, $log, mmCoreWSPrefix,
+            mmCoreEventSiteUpdated, mmCoreEventSiteAdded, mmCoreEventSessionExpired, mmCoreEventSiteDeleted, $mmText,
+            mmCoreConfigConstants) {
 
     $log = $log.getInstance('$mmSitesManager');
 
@@ -57,17 +58,13 @@ angular.module('mm.core')
      * @ngdoc method
      * @name $mmSitesManager#getDemoSiteData
      * @param  {String} siteurl URL of the site to check.
-     * @return {Promise}        Promise to be resolved with the site data if it's a demo site.
-     *                          If it's not a demo site, the promise is rejected.
+     * @return {Object}         Site data if it's a demo site, undefined otherwise.
      */
     self.getDemoSiteData = function(siteurl) {
-        return $mmConfig.get('demo_sites').then(function(demo_sites) {
-            if (typeof(demo_sites) !== 'undefined' && typeof(demo_sites[siteurl]) !== 'undefined') {
-                return demo_sites[siteurl];
-            } else {
-                return $q.reject();
-            }
-        });
+        var demoSites = mmCoreConfigConstants.demo_sites;
+        if (typeof demoSites != 'undefined' && typeof demoSites[siteurl] != 'undefined') {
+            return demoSites[siteurl];
+        }
     };
 
     /**
@@ -103,7 +100,8 @@ angular.module('mm.core')
             return self.siteExists(siteurl).then(function() {
                 // Create a temporary site to check if local_mobile is installed.
                 var temporarySite = $mmSitesFactory.makeSite(undefined, siteurl);
-                return temporarySite.checkLocalMobilePlugin(siteurl).then(function(data) {
+                return temporarySite.checkLocalMobilePlugin().then(function(data) {
+                    siteurl = temporarySite.getURL();
                     services[siteurl] = data.service; // No need to store it in DB.
                     return {siteurl: siteurl, code: data.code, warning: data.warning};
                 });
@@ -130,8 +128,12 @@ angular.module('mm.core')
      * @return {Promise}        A promise to be resolved if the site exists.
      */
     self.siteExists = function(siteurl) {
-        // We pass fake parameters to make CORS work (without params, the script stops before allowing CORS).
-        return $http.head(siteurl + '/login/token.php?username=a&password=b&service=c', {timeout: 30000});
+        var url = siteurl + '/login/token.php';
+        if (!ionic.Platform.isWebView()) {
+            // We pass fake parameters to make CORS work (without params, the script stops before allowing CORS).
+            url = url + '?username=a&password=b&service=c';
+        }
+        return $http.get(url, {timeout: 30000});
     };
 
     /**
@@ -145,7 +147,8 @@ angular.module('mm.core')
      * @param {String} password  Password.
      * @param {String} [service] Service to use. If not defined, it will be searched in memory.
      * @param {Boolean} retry    We are retrying with a prefixed URL.
-     * @return {Promise}         A promise to be resolved when the token is retrieved.
+     * @return {Promise}         A promise to be resolved when the token is retrieved. If success, returns an object
+     *                           with the token and the siteurl to use.
      */
     self.getUserToken = function(siteurl, username, password, service, retry) {
         retry = retry || false;
@@ -154,51 +157,41 @@ angular.module('mm.core')
             return $mmLang.translateAndReject('mm.core.networkerrormsg');
         }
 
-        var promise;
-
-        if (service) {
-            promise = $q.when(service);
-        } else {
-            promise = determineService(siteurl);
+        if (!service) {
+            service = determineService(siteurl);
         }
 
-        return promise.then(function(service) {
+        var loginurl = siteurl + '/login/token.php';
+        var data = {
+            username: username,
+            password: password,
+            service: service
+        };
 
-            var loginurl = siteurl + '/login/token.php';
-            var data = {
-                username: username,
-                password: password,
-                service: service
-            };
+        return $http.post(loginurl, data).then(function(response) {
+            var data = response.data;
 
-            return $http.post(loginurl, data).then(function(response) {
-                var data = response.data;
-
-                if (typeof data == 'undefined') {
-                    return $mmLang.translateAndReject('mm.core.cannotconnect');
+            if (typeof data == 'undefined') {
+                return $mmLang.translateAndReject('mm.core.cannotconnect');
+            } else {
+                if (typeof data.token != 'undefined') {
+                    return {token: data.token, siteurl: siteurl};
                 } else {
-                    if (typeof data.token != 'undefined') {
-                        return data.token;
-                    } else {
-                        if (typeof data.error != 'undefined') {
-                            // We only allow one retry (to avoid loops).
-                            if (!retry && data.errorcode == "requirecorrectaccess") {
-                                siteurl = siteurl.replace("https://", "https://www.");
-                                siteurl = siteurl.replace("http://", "http://www.");
-
-                                return self.getUserToken(siteurl, username, password, service, true);
-                            } else {
-                                return $q.reject(data.error);
-                            }
+                    if (typeof data.error != 'undefined') {
+                        // We only allow one retry (to avoid loops).
+                        if (!retry && data.errorcode == "requirecorrectaccess") {
+                            siteurl = $mmText.addOrRemoveWWW(siteurl);
+                            return self.getUserToken(siteurl, username, password, service, true);
                         } else {
-                            return $mmLang.translateAndReject('mm.login.invalidaccount');
+                            return $q.reject(data.error);
                         }
+                    } else {
+                        return $mmLang.translateAndReject('mm.login.invalidaccount');
                     }
                 }
-            }, function() {
-                return $mmLang.translateAndReject('mm.core.cannotconnect');
-            });
-
+            }
+        }, function() {
+            return $mmLang.translateAndReject('mm.core.cannotconnect');
         });
     };
 
@@ -217,7 +210,7 @@ angular.module('mm.core')
         var candidateSite = $mmSitesFactory.makeSite(undefined, siteurl, token);
 
         return candidateSite.fetchSiteInfo().then(function(infos) {
-            if (isValidMoodleVersion(infos.functions)) {
+            if (isValidMoodleVersion(infos)) {
                 var validation = validateSiteInfo(infos);
                 if (validation === true) {
                     var siteid = self.createSiteID(infos.siteurl, infos.username);
@@ -267,33 +260,58 @@ angular.module('mm.core')
         // First http://
         siteurl = siteurl.replace("https://", "http://");
         if (services[siteurl]) {
-            return $q.when(services[siteurl]);
+            return services[siteurl];
         }
 
         // Now https://
         siteurl = siteurl.replace("http://", "https://");
         if (services[siteurl]) {
-            return $q.when(services[siteurl]);
+            return services[siteurl];
         }
 
         // Return default service.
-        return $mmConfig.get('wsservice');
+        return mmCoreConfigConstants.wsservice;
     }
 
     /**
-     * Check for the minimum required version. We check for WebServices present, not for Moodle version.
-     * This may allow some hacks like using local plugins for adding missing functions in previous versions.
+     * Check for the minimum required version (Moodle 2.4).
      *
      * @param {Array} sitefunctions List of functions of the Moodle site.
      * @return {Boolean}            True if the moodle version is valid, false otherwise.
      */
-    function isValidMoodleVersion(sitefunctions) {
-        for(var i = 0; i < sitefunctions.length; i++) {
-            if (sitefunctions[i].name.indexOf("component_strings") > -1) {
-                return true;
+    function isValidMoodleVersion(infos) {
+        if (!infos) {
+            return false;
+        }
+
+        var minVersion = 2012120300, // Moodle 2.4 version.
+            minRelease = "2.4";
+
+        // Try to validate by version.
+        if (infos.version) {
+            var version = parseInt(infos.version);
+            if (!isNaN(version)) {
+                return version >= minVersion;
             }
         }
-        return false;
+
+        // We couldn't validate by version number. Let's try to validate by release number.
+        if (infos.release) {
+            var matches = infos.release.match(/^([\d|\.]*)/);
+            if (matches && matches.length > 1) {
+                return matches[1] >= minRelease;
+            }
+        }
+
+        // Couldn't validate by release either. Check if it uses local_mobile plugin.
+        var appUsesLocalMobile = false;
+        angular.forEach(infos.functions, function(func) {
+            if (func.name.indexOf(mmCoreWSPrefix) != -1) {
+                appUsesLocalMobile = true;
+            }
+        });
+
+        return appUsesLocalMobile;
     }
 
     /**

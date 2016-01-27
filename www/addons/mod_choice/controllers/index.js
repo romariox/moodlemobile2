@@ -22,7 +22,7 @@ angular.module('mm.addons.mod_choice')
  * @name mmaModChoiceIndexCtrl
  * @todo Delete answer if user can update the answer, show selected if choice is closed (WS returns empty options).
  */
-.controller('mmaModChoiceIndexCtrl', function($scope, $stateParams, $mmaModChoice, $mmUtil, $q, $mmCourse) {
+.controller('mmaModChoiceIndexCtrl', function($scope, $stateParams, $mmaModChoice, $mmUtil, $q, $mmCourse, $translate) {
     var module = $stateParams.module || {},
         courseid = $stateParams.courseid,
         choice,
@@ -32,10 +32,10 @@ angular.module('mm.addons.mod_choice')
     $scope.description = module.description;
     $scope.moduleurl = module.url;
     $scope.courseid = courseid;
-    $scope.now = new Date().getTime();
 
     // Convenience function to get choice data.
-    function fetchChoiceData() {
+    function fetchChoiceData(refresh) {
+        $scope.now = new Date().getTime();
         return $mmaModChoice.getChoice(courseid, module.id).then(function(choicedata) {
             choice = choicedata;
             choice.timeopen = parseInt(choice.timeopen) * 1000;
@@ -52,6 +52,11 @@ angular.module('mm.addons.mod_choice')
                 return fetchResults();
             });
         }).catch(function(message) {
+            if (!refresh) {
+                // Some call failed, retry without using cache since it might be a new activity.
+                return refreshAllData();
+            }
+
             if (message) {
                 $mmUtil.showErrorModal(message);
             } else {
@@ -64,6 +69,8 @@ angular.module('mm.addons.mod_choice')
     // Convenience function to get choice options.
     function fetchOptions() {
         return $mmaModChoice.getOptions(choice.id).then(function(options) {
+            var isOpen = isChoiceOpen();
+            hasAnswered = false;
             $scope.selectedOption = {id: -1}; // Single choice model.
             angular.forEach(options, function(option) {
                 if (option.checked) {
@@ -73,7 +80,8 @@ angular.module('mm.addons.mod_choice')
                     }
                 }
             });
-            $scope.canEdit = choice.allowupdate || !hasAnswered;
+            $scope.canEdit = isOpen && (choice.allowupdate || !hasAnswered);
+            $scope.canDelete = $mmaModChoice.isDeleteResponsesEnabled() && isOpen && choice.allowupdate && hasAnswered;
             $scope.options = options;
         });
     }
@@ -93,6 +101,16 @@ angular.module('mm.addons.mod_choice')
         });
     }
 
+    /**
+     * Check if a choice is open.
+     *
+     * @return {Boolean} True if choice is open, false otherwise.
+     */
+    function isChoiceOpen() {
+        return (choice.timeopen === 0 || choice.timeopen <= $scope.now) &&
+                (choice.timeclose === 0 || choice.timeclose > $scope.now);
+    }
+
     // Convenience function to refresh all the data.
     function refreshAllData() {
         var p1 = $mmaModChoice.invalidateChoiceData(courseid),
@@ -100,7 +118,7 @@ angular.module('mm.addons.mod_choice')
             p3 = choice ? $mmaModChoice.invalidateResults(choice.id) : $q.when();
 
         return $q.all([p1, p2, p3]).finally(function() {
-            return fetchChoiceData();
+            return fetchChoiceData(true);
         });
     }
 
@@ -114,29 +132,52 @@ angular.module('mm.addons.mod_choice')
 
     // Save options selected.
     $scope.save = function() {
-        var responses = [];
-        if (choice.allowmultiple) {
-            angular.forEach($scope.options, function(option) {
-                if (option.checked) {
-                    responses.push(option.id);
-                }
-            });
-        } else {
-            responses.push($scope.selectedOption.id);
-        }
-
-        var modal = $mmUtil.showModalLoading('mm.core.sending', true);
-        $mmaModChoice.submitResponse(choice.id, responses).then(function() {
-            // Success! Let's refresh the data.
-            return refreshAllData();
-        }).catch(function(message) {
-            if (message) {
-                $mmUtil.showErrorModal(message);
+        // Only show confirm if choice doesn't allow update.
+        var promise = choice.allowupdate ? $q.when() : $mmUtil.showConfirm($translate('mm.core.areyousure'));
+        promise.then(function() {
+            var responses = [];
+            if (choice.allowmultiple) {
+                angular.forEach($scope.options, function(option) {
+                    if (option.checked) {
+                        responses.push(option.id);
+                    }
+                });
             } else {
-                $mmUtil.showErrorModal('mma.mod_choice.cannotsubmit', true);
+                responses.push($scope.selectedOption.id);
             }
-        }).finally(function() {
-            modal.dismiss();
+
+            var modal = $mmUtil.showModalLoading('mm.core.sending', true);
+            $mmaModChoice.submitResponse(choice.id, responses).then(function() {
+                // Success! Let's refresh the data.
+                return refreshAllData();
+            }).catch(function(message) {
+                if (message) {
+                    $mmUtil.showErrorModal(message);
+                } else {
+                    $mmUtil.showErrorModal('mma.mod_choice.cannotsubmit', true);
+                }
+            }).finally(function() {
+                modal.dismiss();
+            });
+        });
+    };
+
+    // Delete options selected.
+    $scope.delete = function() {
+        $mmUtil.showConfirm($translate('mm.core.areyousure')).then(function() {
+            var modal = $mmUtil.showModalLoading('mm.core.sending', true);
+            $mmaModChoice.deleteResponses(choice.id).then(function() {
+                // Success! Let's refresh the data.
+                return refreshAllData();
+            }).catch(function(message) {
+                if (message) {
+                    $mmUtil.showErrorModal(message);
+                } else {
+                    $mmUtil.showErrorModal('mma.mod_choice.cannotsubmit', true);
+                }
+            }).finally(function() {
+                modal.dismiss();
+            });
         });
     };
 

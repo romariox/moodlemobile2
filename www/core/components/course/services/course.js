@@ -14,7 +14,7 @@
 
 angular.module('mm.core.course')
 
-.constant('mmCoreCourseModulesStore', 'course_modules')
+.constant('mmCoreCourseModulesStore', 'course_modules') // @deprecated since version 2.6. Please do not use.
 
 .config(function($mmSitesFactoryProvider, mmCoreCourseModulesStore) {
     var stores = [
@@ -33,8 +33,7 @@ angular.module('mm.core.course')
  * @ngdoc service
  * @name $mmCourse
  */
-.factory('$mmCourse', function($mmSite, $mmSitesManager, $translate, $q, $log, $mmFilepool, $mmEvents,
-            mmCoreCourseModulesStore, mmCoreEventCompletionModuleViewed) {
+.factory('$mmCourse', function($mmSite, $translate, $q, $log, $mmEvents, mmCoreEventCompletionModuleViewed) {
 
     $log = $log.getInstance('$mmCourse');
 
@@ -42,7 +41,22 @@ angular.module('mm.core.course')
         mods = ["assign", "assignment", "book", "chat", "choice", "data", "database", "date", "external-tool",
             "feedback", "file", "folder", "forum", "glossary", "ims", "imscp", "label", "lesson", "lti", "page", "quiz",
             "resource", "scorm", "survey", "url", "wiki", "workshop"
-        ];
+        ],
+        modsWithContent = ['book', 'folder', 'imscp', 'page', 'resource', 'url'];
+
+    /**
+     * Add a 'contents' property if the module needs it and it doesn't have it already. In some weird cases the site
+     * doesn't return this property and it's needed. See MOBILE-1381.
+     *
+     * @param {Object} module Module to check.
+     * @return {Object}       Module with contents.
+     */
+    function addContentsIfNeeded(module) {
+        if (modsWithContent.indexOf(module.modname) > -1) {
+            module.contents = module.contents || [];
+        }
+        return module;
+    }
 
     /**
      * Check if module completion could have changed. If it could have, trigger event. This function must be used,
@@ -60,29 +74,6 @@ angular.module('mm.core.course')
                 $mmEvents.trigger(mmCoreEventCompletionModuleViewed, courseId);
             });
         }
-    };
-
-    /**
-     * Clear all modules status in a site.
-     *
-     * @module mm.core.course
-     * @ngdoc method
-     * @name $mmCourse#clearAllModulesStatus
-     * @param {String} siteId Site ID.
-     * @return {Promise}      Promise resolved when all status are cleared.
-     */
-    self.clearAllModulesStatus = function(siteId) {
-        var promises = [];
-        $log.debug('Clear all module status for site ' + siteId);
-        return $mmSitesManager.getSite(siteId).then(function(site) {
-            var db = site.getDb();
-            return db.getAll(mmCoreCourseModulesStore).then(function(entries) {
-                angular.forEach(entries, function(entry) {
-                    promises.push(db.remove(mmCoreCourseModulesStore, entry.id));
-                });
-                return $q.all(promises);
-            });
-        });
     };
 
     /**
@@ -179,7 +170,7 @@ angular.module('mm.core.course')
                 for (var j = 0; j < section.modules.length; j++) {
                     module = section.modules[j];
                     if (module.id === moduleid) {
-                        return module;
+                        return addContentsIfNeeded(module);
                     }
                 }
             }
@@ -213,83 +204,6 @@ angular.module('mm.core.course')
         }
 
         return "img/mod/" + moduleName + ".svg";
-    };
-
-    /**
-     * Get a module previous status.
-     *
-     * @module mm.core.course
-     * @ngdoc method
-     * @name $mmCourse#getModulePreviousStatus
-     * @param {String} siteId Site ID.
-     * @param {Number} id     Module ID.
-     * @return {Promise}      Promise resolved with the status.
-     */
-    self.getModulePreviousStatus = function(siteId, id) {
-        return $mmSitesManager.getSite(siteId).then(function(site) {
-            var db = site.getDb();
-            return db.get(mmCoreCourseModulesStore, id).then(function(module) {
-                return module.previous || $mmFilepool.FILENOTDOWNLOADED;
-            }, function() {
-                return $mmFilepool.FILENOTDOWNLOADED;
-            });
-        });
-    };
-
-    /**
-     * Get a module status.
-     *
-     * @module mm.core.course
-     * @ngdoc method
-     * @name $mmCourse#getModuleStatus
-     * @param {String} siteId           Site ID.
-     * @param {Number} id               Module ID.
-     * @param {Number} [revision=0]     Module's revision.
-     * @param {Number} [timemodified=0] Module's timemodified.
-     * @return {Promise}                Promise resolved with the status.
-     */
-    self.getModuleStatus = function(siteId, id, revision, timemodified) {
-        revision = revision || 0;
-        timemodified = timemodified || 0;
-        return $mmSitesManager.getSite(siteId).then(function(site) {
-            var db = site.getDb();
-            return db.get(mmCoreCourseModulesStore, id).then(function(module) {
-                if (module.status === $mmFilepool.FILEDOWNLOADED) {
-                    if (revision > module.revision || timemodified > module.timemodified) {
-                        // File is outdated. Let's change its status.
-                        module.status = $mmFilepool.FILEOUTDATED;
-                        db.insert(mmCoreCourseModulesStore, module);
-                    }
-                }
-                return module.status;
-            }, function() {
-                return $mmFilepool.FILENOTDOWNLOADED;
-            });
-        });
-    };
-
-    /**
-     * Get module revision number from contents.
-     *
-     * @module mm.core.course
-     * @ngdoc method
-     * @name $mmCourse#getRevisionFromContents
-     * @param {Object[]} contents Module contents.
-     * @return {Number}           Module revision.
-     */
-    self.getRevisionFromContents = function(contents) {
-        if (contents && contents.length) {
-            for (var i = 0; i < contents.length; i++) {
-                var file = contents[i];
-                if (file.fileurl) {
-                    var revision = $mmFilepool.getRevisionFromUrl(file.fileurl);
-                    if (typeof revision !== 'undefined') {
-                        return revision;
-                    }
-                }
-            }
-        }
-        return 0;
     };
 
     /**
@@ -331,17 +245,25 @@ angular.module('mm.core.course')
      * @module mm.core.course
      * @ngdoc method
      * @name $mmCourse#getSections
-     * @param {Number} courseid The course ID.
+     * @param {Number} courseid  The course ID.
+     * @param {Object} [preSets] Optional. Presets to use.
      * @return {Promise} The reject contains the error message, else contains the sections.
      */
-    self.getSections = function(courseid) {
-        var presets = {
-            cacheKey: getSectionsCacheKey(courseid)
-        };
+    self.getSections = function(courseid, preSets) {
+        preSets = preSets || {};
+        preSets.cacheKey = getSectionsCacheKey(courseid);
+
         return $mmSite.read('core_course_get_contents', {
             courseid: courseid,
             options: []
-        }, presets);
+        }, preSets).then(function(sections) {
+            angular.forEach(sections, function(section) {
+                angular.forEach(section.modules, function(module) {
+                    addContentsIfNeeded(module);
+                });
+            });
+            return sections;
+        });
     };
 
     /**
@@ -353,27 +275,6 @@ angular.module('mm.core.course')
     function getSectionsCacheKey(courseid) {
         return 'mmCourse:sections:' + courseid;
     }
-
-    /**
-     * Get module timemodified from contents.
-     *
-     * @module mm.core.course
-     * @ngdoc method
-     * @name $mmCourse#getTimemodifiedFromContents
-     * @param {Object[]} contents Module contents.
-     * @return {Number}           Module timemodified.
-     */
-    self.getTimemodifiedFromContents = function(contents) {
-        if (contents && contents.length) {
-            for (var i = 0; i < contents.length; i++) {
-                var file = contents[i];
-                if (file.timemodified) {
-                    return file.timemodified;
-                }
-            }
-        }
-        return 0;
-    };
 
     /**
      * Invalidates module WS call.
@@ -404,69 +305,6 @@ angular.module('mm.core.course')
         var p1 = $mmSite.invalidateWsCacheForKey(getSectionsCacheKey(courseid)),
             p2 = $mmSite.invalidateWsCacheForKey(getActivitiesCompletionCacheKey(courseid, userid));
         return $q.all([p1, p2]);
-    }
-
-    /**
-     * Check if a module is outdated.
-     *
-     * @module mm.core.course
-     * @ngdoc method
-     * @name $mmCourse#isModuleOutdated
-     * @param {String} siteId           Site ID.
-     * @param {Number} id               Module ID.
-     * @param {Number} [revision=0]     Module's revision.
-     * @param {Number} [timemodified=0] Module's timemodified.
-     * @return {Promise}                Promise resolved with boolean: true if module is outdated, false otherwise.
-     */
-    self.isModuleOutdated = function(siteId, id, revision, timemodified) {
-        revision = revision || 0;
-        timemodified = timemodified || 0;
-        return $mmSitesManager.getSite(siteId).then(function(site) {
-            var db = site.getDb();
-            return db.get(mmCoreCourseModulesStore, id).then(function(module) {
-                return revision > module.revision || timemodified > module.timemodified;
-            }, function() {
-                return false;
-            });
-        });
-    };
-
-    /**
-     * Store module status.
-     *
-     * @module mm.core.course
-     * @ngdoc method
-     * @name $mmCourse#storeModuleStatus
-     * @param {String} siteId           Site ID.
-     * @param {Number} id               Module ID.
-     * @param {String} status           New module status.
-     * @param {Number} [revision=0]     Module's revision.
-     * @param {Number} [timemodified=0] Module's timemodified.
-     * @return {Promise}                Promise resolved when status is stored.
-     */
-    self.storeModuleStatus = function(siteId, id, status, revision, timemodified) {
-        $log.debug('Set status \'' + status + '\' for module ' + id);
-        revision = revision || 0;
-        timemodified = timemodified || 0;
-        return $mmSitesManager.getSite(siteId).then(function(site) {
-            var db = site.getDb();
-
-            // Search current status to set it as previous status.
-            return db.get(mmCoreCourseModulesStore, id).then(function(module) {
-                return module.status;
-            }, function() {
-                return undefined;
-            }).then(function(previousStatus) {
-                return db.insert(mmCoreCourseModulesStore, {
-                    id: id,
-                    status: status,
-                    previous: previousStatus,
-                    revision: revision,
-                    timemodified: timemodified,
-                    updated: new Date().getTime()
-                });
-            });
-        });
     };
 
     /**
