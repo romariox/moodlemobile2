@@ -21,9 +21,9 @@ angular.module('mm.addons.mod_imscp')
  * @ngdoc service
  * @name $mmaModImscpHandlers
  */
-.factory('$mmaModImscpHandlers', function($mmCourse, $mmaModImscp, $mmEvents, $state, $mmSite, $mmUtil, $mmFilepool,
+.factory('$mmaModImscpHandlers', function($mmCourse, $mmaModImscp, $mmEvents, $state, $mmSite, $mmCourseHelper, $mmFilepool,
             $mmCoursePrefetchDelegate, mmCoreDownloading, mmCoreNotDownloaded, mmCoreOutdated, mmCoreEventPackageStatusChanged,
-            mmaModImscpComponent, $mmContentLinksHelper, $q) {
+            mmaModImscpComponent, $mmContentLinksHelper, $q, $mmaModImscpPrefetchHandler) {
     var self = {};
 
     /**
@@ -73,11 +73,8 @@ angular.module('mm.addons.mod_imscp')
                     action: function(e) {
                         e.preventDefault();
                         e.stopPropagation();
-                        $mmaModImscp.prefetchContent(module).catch(function() {
-                            if (!$scope.$$destroyed) {
-                                $mmUtil.showErrorModal('mm.core.errordownloading', true);
-                            }
-                        });
+                        var size = $mmaModImscpPrefetchHandler.getDownloadSize(module);
+                        $mmCourseHelper.prefetchModule($mmaModImscp, module, size, false);
                     }
                 };
 
@@ -88,13 +85,8 @@ angular.module('mm.addons.mod_imscp')
                     action: function(e) {
                         e.preventDefault();
                         e.stopPropagation();
-                        $mmaModImscp.invalidateContent(module.id).then(function() {
-                            $mmaModImscp.prefetchContent(module).catch(function() {
-                                if (!$scope.$$destroyed) {
-                                    $mmUtil.showErrorModal('mm.core.errordownloading', true);
-                                }
-                            });
-                        });
+                        var size = $mmaModImscpPrefetchHandler.getDownloadSize(module);
+                        $mmCourseHelper.prefetchModule($mmaModImscp, module, size, true);
                     }
                 };
 
@@ -177,10 +169,23 @@ angular.module('mm.addons.mod_imscp')
          */
         self.getActions = function(siteIds, url, courseId) {
             // Check it's an IMSCP URL.
-            if (url.indexOf('/mod/imscp/view.php') > -1) {
+            if (typeof self.handles(url) != 'undefined') {
                 return $mmContentLinksHelper.treatModuleIndexUrl(siteIds, url, isEnabled, courseId);
             }
             return $q.when([]);
+        };
+
+        /**
+         * Check if the URL is handled by this handler. If so, returns the URL of the site.
+         *
+         * @param  {String} url URL to check.
+         * @return {String}     Site URL. Undefined if the URL doesn't belong to this handler.
+         */
+        self.handles = function(url) {
+            var position = url.indexOf('/mod/imscp/view.php');
+            if (position > -1) {
+                return url.substr(0, position);
+            }
         };
 
         return self;

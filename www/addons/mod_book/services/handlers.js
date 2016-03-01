@@ -21,9 +21,9 @@ angular.module('mm.addons.mod_book')
  * @ngdoc service
  * @name $mmaModBookHandlers
  */
-.factory('$mmaModBookHandlers', function($mmCourse, $mmaModBook, $mmEvents, $state, $mmSite, $mmUtil, $mmFilepool,
+.factory('$mmaModBookHandlers', function($mmCourse, $mmaModBook, $mmEvents, $state, $mmSite, $mmCourseHelper, $mmFilepool,
             $mmCoursePrefetchDelegate, mmCoreDownloading, mmCoreNotDownloaded, mmCoreOutdated, mmCoreDownloaded,
-            mmCoreEventPackageStatusChanged, mmaModBookComponent, $mmContentLinksHelper, $q) {
+            mmCoreEventPackageStatusChanged, mmaModBookComponent, $mmContentLinksHelper, $q, $mmaModBookPrefetchHandler) {
 
     var self = {};
 
@@ -67,11 +67,8 @@ angular.module('mm.addons.mod_book')
                     action: function(e) {
                         e.preventDefault();
                         e.stopPropagation();
-                        $mmaModBook.prefetchContent(module).catch(function() {
-                            if (!$scope.$$destroyed) {
-                                $mmUtil.showErrorModal('mm.core.errordownloading', true);
-                            }
-                        });
+                        var size = $mmaModBookPrefetchHandler.getDownloadSize(module);
+                        $mmCourseHelper.prefetchModule($mmaModBook, module, size, false);
                     }
                 };
 
@@ -82,14 +79,8 @@ angular.module('mm.addons.mod_book')
                     action: function(e) {
                         e.preventDefault();
                         e.stopPropagation();
-
-                        $mmaModBook.invalidateContent(module.id).finally(function() {
-                            $mmaModBook.prefetchContent(module).catch(function() {
-                                if (!$scope.$$destroyed) {
-                                    $mmUtil.showErrorModal('mm.core.errordownloading', true);
-                                }
-                            });
-                        });
+                        var size = $mmaModBookPrefetchHandler.getDownloadSize(module);
+                        $mmCourseHelper.prefetchModule($mmaModBook, module, size, true);
                     }
                 };
 
@@ -173,10 +164,23 @@ angular.module('mm.addons.mod_book')
          */
         self.getActions = function(siteIds, url, courseId) {
             // Check it's a book URL.
-            if (url.indexOf('/mod/book/view.php') > -1) {
+            if (typeof self.handles(url) != 'undefined') {
                 return $mmContentLinksHelper.treatModuleIndexUrl(siteIds, url, isEnabled, courseId);
             }
             return $q.when([]);
+        };
+
+        /**
+         * Check if the URL is handled by this handler. If so, returns the URL of the site.
+         *
+         * @param  {String} url URL to check.
+         * @return {String}     Site URL. Undefined if the URL doesn't belong to this handler.
+         */
+        self.handles = function(url) {
+            var position = url.indexOf('/mod/book/view.php');
+            if (position > -1) {
+                return url.substr(0, position);
+            }
         };
 
         return self;

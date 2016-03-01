@@ -23,7 +23,7 @@ angular.module('mm.addons.mod_scorm')
  */
 .factory('$mmaModScormHandlers', function($mmCourse, $mmaModScorm, $mmEvents, $state, $mmSite, $mmaModScormHelper,
         $mmCoursePrefetchDelegate, mmCoreDownloading, mmCoreNotDownloaded, mmCoreOutdated, mmCoreEventPackageStatusChanged,
-        mmaModScormComponent, $q, $mmContentLinksHelper) {
+        mmaModScormComponent, $q, $mmContentLinksHelper, $mmUtil) {
     var self = {};
 
     /**
@@ -90,12 +90,26 @@ angular.module('mm.addons.mod_scorm')
                         timemodified = 0;
 
                     function download() {
-                        $mmaModScormHelper.confirmDownload(scorm).then(function() {
-                            $mmaModScorm.prefetch(scorm).catch(function() {
-                                if (!$scope.$$destroyed) {
-                                    $mmaModScormHelper.showDownloadError(scorm);
-                                }
+                        // We need to call getScorm again, the package might have been updated.
+                        $scope.spinner = true; // Show spinner since this operation might take a while.
+                        $mmaModScorm.getScorm(courseid, module.id, module.url).then(function(scorm) {
+                            $mmaModScormHelper.confirmDownload(scorm).then(function() {
+                                $mmaModScorm.prefetch(scorm).catch(function() {
+                                    if (!$scope.$$destroyed) {
+                                        $mmaModScormHelper.showDownloadError(scorm);
+                                    }
+                                });
+                            }).catch(function() {
+                                // User hasn't confirmed, stop spinner.
+                                $scope.spinner = false;
                             });
+                        }).catch(function(error) {
+                            $scope.spinner = false;
+                            if (error) {
+                                $mmUtil.showErrorModal(error);
+                            } else {
+                                $mmaModScormHelper.showDownloadError(scorm);
+                            }
                         });
                     }
 
@@ -186,10 +200,23 @@ angular.module('mm.addons.mod_scorm')
          */
         self.getActions = function(siteIds, url, courseId) {
             // Check it's a SCORM URL.
-            if (url.indexOf('/mod/scorm/view.php') > -1) {
+            if (typeof self.handles(url) != 'undefined') {
                 return $mmContentLinksHelper.treatModuleIndexUrl(siteIds, url, isEnabled, courseId);
             }
             return $q.when([]);
+        };
+
+        /**
+         * Check if the URL is handled by this handler. If so, returns the URL of the site.
+         *
+         * @param  {String} url URL to check.
+         * @return {String}     Site URL. Undefined if the URL doesn't belong to this handler.
+         */
+        self.handles = function(url) {
+            var position = url.indexOf('/mod/scorm/view.php');
+            if (position > -1) {
+                return url.substr(0, position);
+            }
         };
 
         return self;

@@ -21,9 +21,9 @@ angular.module('mm.addons.mod_page')
  * @ngdoc service
  * @name $mmaModPageHandlers
  */
-.factory('$mmaModPageHandlers', function($mmCourse, $mmaModPage, $mmEvents, $state, $mmSite, $mmUtil, $mmFilepool,
+.factory('$mmaModPageHandlers', function($mmCourse, $mmaModPage, $mmEvents, $state, $mmSite, $mmCourseHelper, $mmFilepool,
             $mmCoursePrefetchDelegate, mmCoreDownloading, mmCoreNotDownloaded, mmCoreOutdated, mmCoreEventPackageStatusChanged,
-            mmaModPageComponent, $mmContentLinksHelper, $q) {
+            mmaModPageComponent, $mmContentLinksHelper, $q, $mmaModPagePrefetchHandler) {
     var self = {};
 
     /**
@@ -67,11 +67,8 @@ angular.module('mm.addons.mod_page')
                     action: function(e) {
                         e.preventDefault();
                         e.stopPropagation();
-                        $mmaModPage.prefetchContent(module).catch(function() {
-                            if (!$scope.$$destroyed) {
-                                $mmUtil.showErrorModal('mm.core.errordownloading', true);
-                            }
-                        });
+                        var size = $mmaModPagePrefetchHandler.getDownloadSize(module);
+                        $mmCourseHelper.prefetchModule($mmaModPage, module, size, false);
                     }
                 };
 
@@ -82,13 +79,8 @@ angular.module('mm.addons.mod_page')
                     action: function(e) {
                         e.preventDefault();
                         e.stopPropagation();
-                        $mmaModPage.invalidateContent(module.id).finally(function() {
-                            $mmaModPage.prefetchContent(module).catch(function() {
-                                if (!$scope.$$destroyed) {
-                                    $mmUtil.showErrorModal('mm.core.errordownloading', true);
-                                }
-                            });
-                        });
+                        var size = $mmaModPagePrefetchHandler.getDownloadSize(module);
+                        $mmCourseHelper.prefetchModule($mmaModPage, module, size, true);
                     }
                 };
 
@@ -171,10 +163,23 @@ angular.module('mm.addons.mod_page')
          */
         self.getActions = function(siteIds, url, courseId) {
             // Check it's a page URL.
-            if (url.indexOf('/mod/page/view.php') > -1) {
+            if (typeof self.handles(url) != 'undefined') {
                 return $mmContentLinksHelper.treatModuleIndexUrl(siteIds, url, isEnabled, courseId);
             }
             return $q.when([]);
+        };
+
+        /**
+         * Check if the URL is handled by this handler. If so, returns the URL of the site.
+         *
+         * @param  {String} url URL to check.
+         * @return {String}     Site URL. Undefined if the URL doesn't belong to this handler.
+         */
+        self.handles = function(url) {
+            var position = url.indexOf('/mod/page/view.php');
+            if (position > -1) {
+                return url.substr(0, position);
+            }
         };
 
         return self;
