@@ -3,15 +3,15 @@
         xmlns:gap = "http://phonegap.com/ns/1.0"
         xmlns:android = "http://schemas.android.com/apk/res/android"
         id        = "br.edu.fate.avamobile"
-        versionCode = "2010"
-        version   = "2.9">
+        versionCode = "1000"
+        version   = "1.0">
     <name>Fate AVA mobile</name>
 
     <description>
         Aplicativo complementar da plataforma AVA da faculdade Ateneu
     </description>
 
-    <author href="http://moodle.com" email="mobile@moodle.com">
+    <author href="http://fate.edu.br" email="suporte@fate.edu.br">
         Moodle Pty Ltd
     </author>
 
