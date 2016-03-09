@@ -3,7 +3,7 @@
         xmlns:gap = "http://phonegap.com/ns/1.0"
         xmlns:android = "http://schemas.android.com/apk/res/android"
         id        = "br.edu.fate.avamobile"
-        versionCode = "2010"
+        versionCode = "2011"
         version   = "2.9">
     <name>Fate AVA mobile</name>
 
@@ -11,8 +11,8 @@
         Aplicativo complementar da plataforma AVA da faculdade Ateneu
     </description>
 
-    <author href="http://fate.edu.br" email="suporte@fate.edu.br">
-        Moodle Pty Ltd
+    <author href="http://fate.edu.br" email="romario.rodrigues@fate.edu.br">
+        Romário Rodrigues Ramos
     </author>
 
     <gap:config-file platform="ios" parent="CFBundleShortVersionString">
