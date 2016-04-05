@@ -3,7 +3,7 @@
         xmlns:gap = "http://phonegap.com/ns/1.0"
         xmlns:android = "http://schemas.android.com/apk/res/android"
         id        = "br.edu.fate.avamobile"
-        versionCode = "2011"
+        versionCode = "2012"
         version   = "2.9">
     <name>Fate AVA mobile</name>
 
