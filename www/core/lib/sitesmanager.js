@@ -222,7 +222,7 @@ angular.module('mm.core')
                     currentSite = candidateSite;
                     // Store session.
                     self.login(siteid);
-                    $mmEvents.trigger(mmCoreEventSiteAdded);
+                    $mmEvents.trigger(mmCoreEventSiteAdded, siteid);
                 } else {
                     return $translate(validation.error, validation.params).then(function(error) {
                         return $q.reject(error);
@@ -575,9 +575,10 @@ angular.module('mm.core')
      */
     self.logout = function() {
         currentSite = undefined;
-        $mmEvents.trigger(mmCoreEventLogout);
-        return $mmApp.getDB().remove(mmCoreCurrentSiteStore, 1);
-    }
+        return $mmApp.getDB().remove(mmCoreCurrentSiteStore, 1).finally(function() {
+            $mmEvents.trigger(mmCoreEventLogout);
+        });
+    };
 
     /**
      * Restores the session to the previous one so the user doesn't has to login everytime the app is started.
@@ -720,6 +721,20 @@ angular.module('mm.core')
         }).catch(function() {
             // Shouldn't happen.
             return [];
+        });
+    };
+
+    /**
+     * Get the site ID stored in DB ad current site.
+     *
+     * @module mm.core
+     * @ngdoc method
+     * @name $mmSitesManager#getStoredCurrentSiteId
+     * @return {Promise} Promise resolved with the site ID.
+     */
+    self.getStoredCurrentSiteId = function() {
+        return $mmApp.getDB().get(mmCoreCurrentSiteStore, 1).then(function(current_site) {
+            return current_site.siteid;
         });
     };
 

@@ -107,6 +107,7 @@ angular.module('mm.addons.grades')
             return function($scope, $state) {
                 $scope.icon = 'ion-stats-bars';
                 $scope.title = 'mma.grades.grades';
+                $scope.class = 'mma-grades-mine-handler';
                 $scope.action = function($event, course) {
                     $event.preventDefault();
                     $event.stopPropagation();
@@ -178,6 +179,7 @@ angular.module('mm.addons.grades')
              */
             return function($scope) {
                 $scope.title = 'mma.grades.viewgrades';
+                $scope.class = 'mma-grades-user-handler';
 
                 $scope.action = function($event) {
                     $event.preventDefault();
@@ -281,6 +283,8 @@ angular.module('mm.addons.grades')
 .run(function($mmaGradesHandlers, $mmEvents, mmCoreEventLogout, mmUserEventProfileRefreshed) {
     $mmEvents.on(mmCoreEventLogout, $mmaGradesHandlers.clearViewGradesCache);
     $mmEvents.on(mmUserEventProfileRefreshed, function(data) {
-        $mmaGradesHandlers.clearViewGradesCache(data.courseid, data.userid);
+        if (data) {
+            $mmaGradesHandlers.clearViewGradesCache(data.courseid, data.userid);
+        }
     });
 });

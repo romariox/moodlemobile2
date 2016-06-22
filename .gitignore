@@ -9,3 +9,4 @@ www/build
 .sass-cache/
 www/lib
 www/config.xml
+e2e/build
