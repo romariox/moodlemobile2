@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<<<<<<< HEAD
 <widget id="br.edu.fate.avamobile" version="3.1.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
   <name>Fate AVA Mobile</name>
   <description>Aplicativo da plataforma AVA da Faculdade Ateneu.</description>
