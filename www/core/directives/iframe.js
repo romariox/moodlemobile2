@@ -34,18 +34,22 @@ angular.module('mm.core')
 
     /**
      * Intercept window.open in a frame and its subframes, shows an error modal instead.
+     * Search links (<a>) and open them in browser or InAppBrowser if needed.
      *
      * @param  {DOMElement} element Element to treat.
      * @return {Void}
      */
-    function interceptPopups(element) {
+    function treatFrame(element) {
         if (element) {
             // Redefine window.open in this element and sub frames, it might have been loaded already.
             redefineWindowOpen(element);
+            // Treat links.
+            treatLinks(element);
 
             element.on('load', function() {
-                // Element loaded, redefine window.open again.
+                // Element loaded, redefine window.open and treat links again.
                 redefineWindowOpen(element);
+                treatLinks(element);
             });
         }
     }
@@ -68,7 +72,7 @@ angular.module('mm.core')
 
         if (!contentWindow && el && el.getSVGDocument) {
             // It's probably an <embed>. Try to get the window.
-            var svgDoc = el.getSVGDocument;
+            var svgDoc = el.getSVGDocument();
             if (svgDoc && svgDoc.defaultView) {
                 contents = angular.element(svgdoc);
                 contentWindow = svgdoc.defaultView;
@@ -96,8 +100,58 @@ angular.module('mm.core')
         // Search sub frames.
         angular.forEach(tags, function(tag) {
             angular.forEach(contents.find(tag), function(subelement) {
-                interceptPopups(angular.element(subelement));
+                treatFrame(angular.element(subelement));
             });
+        });
+    }
+
+    /**
+     * Search links (<a>) and open them in browser or InAppBrowser if needed.
+     *
+     * @param  {DOMElement} element Element to treat.
+     * @return {Void}
+     */
+    function treatLinks(element) {
+        var links = element.contents().find('a');
+        angular.forEach(links, function(el) {
+            var href = el.href;
+
+            // Check that href is not null.
+            if (href) {
+                if (href.indexOf('http') === 0) {
+                    // Link has protocol http(s), open it in browser.
+                    angular.element(el).on('click', function(e) {
+                        // If the link's already prevented then we won't open it in browser.
+                        if (!e.defaultPrevented) {
+                            e.preventDefault();
+                            $mmUtil.openInBrowser(href);
+                        }
+                    });
+                } else if (el.target == '_parent' || el.target == '_top' || el.target == '_blank') {
+                    // Opening links with _parent, _top or _blank can break the app. We'll open it in InAppBrowser.
+                    angular.element(el).on('click', function(e) {
+                        // If the link's already prevented then we won't open it in InAppBrowser.
+                        if (!e.defaultPrevented) {
+                            e.preventDefault();
+                            $mmUtil.openInApp(href);
+                        }
+                    });
+                } else if (ionic.Platform.isIOS() && (!el.target || el.target == '_self')) {
+                    // In cordova ios 4.1.0 links inside iframes stopped working. We'll manually treat them.
+                    angular.element(el).on('click', function(e) {
+                        // If the link's already prevented then we won't treat it.
+                        if (!e.defaultPrevented) {
+                            if (element[0].tagName.toLowerCase() == 'object') {
+                                e.preventDefault();
+                                element.attr('data', href);
+                            } else {
+                                e.preventDefault();
+                                element.attr('src', href);
+                            }
+                        }
+                    });
+                }
+            }
         });
     }
 
@@ -112,18 +166,7 @@ angular.module('mm.core')
             scope.height = $mmUtil.formatPixelsSize(attrs.iframeHeight) || '100%';
 
             var iframe = angular.element(element.find('iframe')[0]);
-            interceptPopups(iframe);
-            iframe.on('load', function() {
-                angular.forEach(iframe.contents().find('a'), function(el) {
-                    var href = el.getAttribute('href');
-                    if (href && href.indexOf('http') === 0) { // Check that href is not null.
-                        angular.element(el).on('click', function(e) {
-                            $mmUtil.openInBrowser(href);
-                            e.preventDefault();
-                        });
-                    }
-                });
-            });
+            treatFrame(iframe);
 
         }
     };

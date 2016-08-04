@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<widget id="com.moodle.moodlemobile" version="2.8" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.moodle.moodlemobile" version="3.1.2" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
   <name>Moodle Mobile</name>
   <description>Official Moodle Mobile app</description>
   <author href="http://moodle.com" email="juan@moodle.com">Juan Leyva</author>
   <content src="index.html"/>
   <access origin="*"/>
-  <allow-navigation href="cdvfile:*"/>
-  <allow-navigation href="content:*"/>
-  <allow-navigation href="data:*"/>
-  <allow-intent href="*"/>
+
+  <allow-navigation href="cdvfile:*" />
+  <allow-navigation href="content:*" />
+  <allow-navigation href="data:*" />
+  <allow-navigation href="*" />
+
+  <allow-intent href="*" />
+
   <preference name="webviewbounce" value="false"/>
   <preference name="UIWebViewBounce" value="false"/>
   <preference name="DisallowOverscroll" value="true"/>

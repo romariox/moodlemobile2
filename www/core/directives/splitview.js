@@ -19,6 +19,12 @@ angular.module('mm.core')
 /**
  * Directive to create a split view layout. This directive should be used along with mm-split-view-link.
  *
+ * IMPORTANT: Due to a limitation in Angular ui-router, the left pane state and the right pane state should NOT have
+ * parameters with the same name but different value. It can cause unexpected behaviors.
+ * Example: if the left pane loads a state with param 'courseid', then all the states that can be loaded in the right pane
+ * should avoid having a parameter named 'courseid'. The right pane state can have a 'courseid' param only if it will always
+ * have the same value than in left pane state.
+ *
  * @module mm.core
  * @ngdoc directive
  * @name mmSplitView
@@ -37,6 +43,12 @@ angular.module('mm.core')
  * immediately load the link set (if no link is set it will load the first link found). Example:
  * $rootScope.$broadcast(mmCoreSplitViewLoad, {load: 2});
  *
+ * IMPORTANT: Due to a limitation in Angular ui-router, the left pane state and the right pane state should NOT have
+ * parameters with the same name but different value. It can cause unexpected behaviors.
+ * Example: if the left pane loads a state with param 'courseid', then all the states that can be loaded in the right pane
+ * should avoid having a parameter named 'courseid'. The right pane state can have a 'courseid' param only if it will always
+ * have the same value than in left pane state.
+ *
  * Accepts the following params:
  *
  * @param {String} [menuWidth] Width of the left menu. Can be specified in pixels ('200px') or in percentage ('30%').
@@ -48,6 +60,8 @@ angular.module('mm.core')
  *
  * @param {Number} [load] Link to load. If not set then the first link will be loaded by default. If it's set then it will
  *                        try to load the nth link. E.g. load=2 will load the second link in the page.
+ *
+ * @param {String} [menuState] Name of the state loaded in the left pane (menu). If not defined it will use $state.$current.name.
  */
 .directive('mmSplitView', function($log, $state, $ionicPlatform, $timeout, $mmUtil, $interpolate, mmCoreSplitViewLoad) {
 
@@ -188,7 +202,7 @@ angular.module('mm.core')
         link: function(scope, element, attrs, controller) {
             var el = element[0],
                 menu = angular.element(el.querySelector('.mm-split-pane-menu')),
-                menuState = $state.$current.name,
+                menuState = attrs.menuState || $state.$current.name,
                 menuParams = $state.params,
                 menuWidth = attrs.menuWidth,
                 component = attrs.component || 'tablet';
