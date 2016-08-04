@@ -281,6 +281,29 @@ angular.module('mm.core.course')
     };
 
     /**
+     * Given a list of sections, returns the list of modules in the sections.
+     *
+     * @module mm.core.course
+     * @ngdoc method
+     * @name $mmCourseHelper#getSectionsModules
+     * @param  {Object[]} sections Sections.
+     * @return {Object[]}          Modules.
+     */
+    self.getSectionsModules = function(sections) {
+        if (!sections || !sections.length) {
+            return [];
+        }
+
+        var modules = [];
+        sections.forEach(function(section) {
+            if (section.modules) {
+                modules = modules.concat(section.modules);
+            }
+        });
+        return modules;
+    };
+
+    /**
      * Retrieves the courseId of the module and navigates to it.
      *
      * @module mm.core.course
@@ -318,15 +341,27 @@ angular.module('mm.core.course')
             }
 
             return promise.then(function() {
-                return $state.go('redirect', {
-                    siteid: siteId,
-                    state: 'site.mm_course',
-                    params: {
-                        courseid: courseId,
-                        moduleid: moduleId,
-                        sid: sectionId
-                    }
-                });
+                if (courseId == 1) {
+                    // It's front page we go directly to course section.
+                    return $state.go('redirect', {
+                        siteid: siteId,
+                        state: 'site.mm_course-section',
+                        params: {
+                            cid: courseId,
+                            mid: moduleId
+                        }
+                    });
+                } else {
+                    return $state.go('redirect', {
+                        siteid: siteId,
+                        state: 'site.mm_course',
+                        params: {
+                            courseid: courseId,
+                            moduleid: moduleId,
+                            sid: sectionId
+                        }
+                    });
+                }
             });
         }).catch(function(error) {
             if (error) {

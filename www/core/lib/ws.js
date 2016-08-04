@@ -233,7 +233,7 @@ angular.module('mm.core')
                         promise = self.getRemoteFileMimeType(url).then(function(mime) {
                             var ext;
                             if (mime) {
-                                ext = $mmFS.getExtension(mime);
+                                ext = $mmFS.getExtension(mime, url);
                                 if (ext) {
                                     path += '.' + ext;
                                 }
@@ -272,22 +272,28 @@ angular.module('mm.core')
      * @ngdoc method
      * @name $mmWS#uploadFile
      * @param {Object} uri File URI.
-     * @param {Object} options File settings: fileKey, fileName and mimeType.
-     * @param {Object} presets Contains siteurl and token.
+     * @param {Object} options File settings: fileKey, fileName, mimeType, fileArea and itemId.
+     * @param {Object} preSets Contains siteurl and token.
      * @return {Promise}
      */
-    self.uploadFile = function(uri, options, presets) {
+    self.uploadFile = function(uri, options, preSets) {
         $log.debug('Trying to upload file: ' + uri);
 
+        if (!uri || !options || !preSets) {
+            return $q.reject();
+        }
+
         var ftOptions = {},
-            deferred = $q.defer();
+            uploadUrl = preSets.siteurl + '/webservice/upload.php';
 
         ftOptions.fileKey = options.fileKey;
         ftOptions.fileName = options.fileName;
         ftOptions.httpMethod = 'POST';
         ftOptions.mimeType = options.mimeType;
         ftOptions.params = {
-            token: presets.token
+            token: preSets.token,
+            filearea: options.fileArea || 'draft',
+            itemid: options.itemId || 0
         };
         ftOptions.chunkedMode = false;
         ftOptions.headers = {
@@ -295,17 +301,37 @@ angular.module('mm.core')
         };
 
         $log.debug('Initializing upload');
-        $cordovaFileTransfer.upload(presets.siteurl + '/webservice/upload.php', uri, ftOptions, true).then(function(success) {
-            $log.debug('Successfully uploaded file');
-            deferred.resolve(success);
-        }, function(error) {
-            $log.error('Error while uploading file: ' + error.exception);
-            deferred.reject(error);
-        }, function(progress) {
-            deferred.notify(progress);
-        });
+        return $cordovaFileTransfer.upload(uploadUrl, uri, ftOptions, true).then(function(success) {
+            var data = success.response;
+            try {
+                data = JSON.parse(data);
+            } catch(err) {
+                $log.error('Error parsing response:', err, data);
+                return $mmLang.translateAndReject('mm.core.errorinvalidresponse');
+            }
 
-        return deferred.promise;
+            if (!data) {
+                return $mmLang.translateAndReject('mm.core.serverconnection');
+            } else if (typeof data != 'object') {
+                $log.warn('Upload file: Response of type "' + typeof data + '" received, expecting "object"');
+                return $mmLang.translateAndReject('mm.core.errorinvalidresponse');
+            }
+
+            if (typeof data.exception !== 'undefined') {
+                return $q.reject(data.message);
+            } else if (data && typeof data.error !== 'undefined') {
+                return $q.reject(data.error);
+            } else if (data[0] && typeof data[0].error !== 'undefined') {
+                return $q.reject(data[0].error);
+            }
+
+            // We uploaded only 1 file, so we only return the first file returned.
+            $log.debug('Successfully uploaded file');
+            return data[0];
+        }, function(error) {
+            $log.error('Error while uploading file', error.exception);
+            return $mmLang.translateAndReject('mm.core.serverconnection');
+        });
     };
 
     /**
