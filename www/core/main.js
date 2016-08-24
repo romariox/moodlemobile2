@@ -36,6 +36,7 @@ angular.module('mm.core', ['pascalprecht.translate'])
 
     // Set tabs to bottom on Android.
     $ionicConfigProvider.platform.android.tabs.position('bottom');
+    $ionicConfigProvider.form.checkbox('circle');
 
     // Decorate $ionicPlatform.
     $provide.decorator('$ionicPlatform', ['$delegate', '$window', function($delegate, $window) {
@@ -43,6 +44,24 @@ angular.module('mm.core', ['pascalprecht.translate'])
             var mq = 'only screen and (min-width: 768px) and (-webkit-min-device-pixel-ratio: 1)';
             return $window.matchMedia(mq).matches;
         };
+        return $delegate;
+    }]);
+
+    // Decorate ion-radio in order to enabled links on its texts.
+    $provide.decorator('ionRadioDirective', ['$delegate', function($delegate) {
+        var directive = $delegate[0];
+
+        transcludeRegex = /ng-transclude/
+        directive.template =  directive.template.replace(transcludeRegex, 'ng-transclude data-tap-disabled="true"');
+        return $delegate;
+    }]);
+
+    // Decorate ion-checkbox in order to enabled links on its texts.
+    $provide.decorator('ionCheckboxDirective', ['$delegate', function($delegate) {
+        var directive = $delegate[0];
+
+        transcludeRegex = /ng-transclude/
+        directive.template =  directive.template.replace(transcludeRegex, 'ng-transclude data-tap-disabled="true"');
         return $delegate;
     }]);
 
@@ -143,7 +162,8 @@ angular.module('mm.core', ['pascalprecht.translate'])
     $mmInitDelegateProvider.registerProcess('mmFSClearTmp', '$mmFS.clearTmpFolder', mmInitDelegateMaxAddonPriority + 150, false);
 })
 
-.run(function($ionicPlatform, $ionicBody, $window, $mmEvents, $mmInitDelegate, mmCoreEventKeyboardShow, mmCoreEventKeyboardHide) {
+.run(function($ionicPlatform, $ionicBody, $window, $mmEvents, $mmInitDelegate, mmCoreEventKeyboardShow, mmCoreEventKeyboardHide,
+        $mmApp, $timeout, mmCoreEventOnline) {
     // Execute all the init processes.
     $mmInitDelegate.executeInitProcesses();
 
@@ -163,4 +183,25 @@ angular.module('mm.core', ['pascalprecht.translate'])
             $mmEvents.trigger(mmCoreEventKeyboardHide, e);
         });
     });
+
+    // Send event when device goes online.
+    var lastExecution = 0;
+
+    $mmApp.ready().then(function() {
+        document.addEventListener('online', sendOnlineEvent, false); // Cordova event.
+        window.addEventListener('online', sendOnlineEvent, false); // HTML5 event.
+    });
+
+    function sendOnlineEvent() {
+        // The online function can be called several times in a row, prevent consecutive executions.
+        var now = new Date().getTime();
+        if (now - lastExecution < 5000) {
+            return;
+        }
+        lastExecution = now;
+
+        $timeout(function() { // Minor delay just to make sure network is fully established.
+            $mmEvents.trigger(mmCoreEventOnline);
+        }, 1000);
+    }
 });
