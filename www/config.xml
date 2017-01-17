@@ -3,8 +3,8 @@
         xmlns:gap = "http://phonegap.com/ns/1.0"
         xmlns:android = "http://schemas.android.com/apk/res/android"
         id        = "br.edu.fate.avamobile"
-        versionCode = "2014"
-        version   = "3.1.2">
+        versionCode = "2016"
+        version   = "3.2.0">
     <name>Fate AVA mobile</name>
 
     <description>
@@ -16,7 +16,7 @@
     </author>
 
     <gap:config-file platform="ios" parent="CFBundleShortVersionString">
-        <string>3.1.2</string>
+        <string>3.2.0</string>
     </gap:config-file>
 
     <gap:platform name="ios" />
@@ -44,6 +44,7 @@
     <preference name="load-url-timeout" value="60000" />
 
     <preference name="android-minSdkVersion" value="14" />
+	<preference name="android-installLocation" value="auto" />
     <preference name="UIWebViewBounce" value="false" />
     <preference name="DisallowOverscroll" value="true" />
     <preference name="BackupWebStorage" value="none" />
@@ -118,21 +119,21 @@
     <gap:plugin name="cordova-plugin-globalization" source="npm" />
     <gap:plugin name="cordova-plugin-inappbrowser" source="npm" />
     <gap:plugin name="cordova-plugin-network-information" source="npm" />
-    <gap:plugin name="cordova-plugin-statusbar" source="npm" />
+	<gap:plugin name="cordova-plugin-statusbar" source="npm" version="2.1.2" />
     <gap:plugin name="cordova-plugin-whitelist" source="npm" />
     <gap:plugin name="cordova-plugin-splashscreen" source="npm" />
 
-    <gap:plugin name="phonegap-plugin-push" source="npm" >
+    <gap:plugin name="phonegap-plugin-push" source="npm" version="1.7.0">
         <param name="SENDER_ID" value="694767596569" />
     </gap:plugin>
-    <gap:plugin name="net.tunts.webintent" />
     <gap:plugin name="cordova-plugin-customurlscheme" source="npm">
         <param name="URL_SCHEME" value="moodlemobile" />
     </gap:plugin>
     <gap:plugin name="ionic-plugin-keyboard" source="npm" />
-    <gap:plugin name="de.appplant.cordova.plugin.local-notification" source="npm" />
-    <gap:plugin name="ch.ti8m.documenthandler" version="0.2.1" />
     <gap:plugin name="cordova-plugin-zip" source="npm" />
+	<gap:plugin name="cordova-plugin-local-notifications-mm" source="npm" />
+    <gap:plugin name="net.tunts.webintent" spec="https://github.com/Tunts/WebIntent.git" source="git" />
+    <gap:plugin name="ch.ti8m.documenthandler" spec="https://github.com/ti8m/DocumentHandler.git" source="git" />
 
     <gap:config-file platform="android" parent="/manifest">
          <application android:debuggable="true" />
