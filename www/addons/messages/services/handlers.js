@@ -23,7 +23,8 @@ angular.module('mm.addons.messages')
  * @ngdoc service
  * @name $mmaMessagesHandlers
  */
-.factory('$mmaMessagesHandlers', function($log, $mmaMessages, $mmSite, $state, $mmUtil, $mmContentLinksHelper) {
+.factory('$mmaMessagesHandlers', function($log, $mmaMessages, $mmSite, $state, $mmUtil, $mmContentLinksHelper, $mmaMessagesSync,
+            $mmSitesManager, mmUserProfileHandlersTypeCommunication, mmUserProfileHandlersTypeAction, $translate) {
     $log = $log.getInstance('$mmaMessagesHandlers');
 
     var self = {};
@@ -37,13 +38,24 @@ angular.module('mm.addons.messages')
      */
     self.addContact = function() {
 
-        var self = {};
+        var self = {
+            type: mmUserProfileHandlersTypeAction
+        };
 
         self.isEnabled = function() {
             return $mmaMessages.isPluginEnabled();
         };
 
-        self.isEnabledForUser = function(user, courseId) {
+        /**
+         * Check if handler is enabled for this user in this context.
+         *
+         * @param {Object} user     User to check.
+         * @param {Number} courseId Course ID.
+         * @param  {Object} [navOptions] Course navigation options for current user. See $mmCourses#getUserNavigationOptions.
+         * @param  {Object} [admOptions] Course admin options for current user. See $mmCourses#getUserAdministrationOptions.
+         * @return {Promise}        Promise resolved with true if plugin is enabled, rejected or resolved with false otherwise.
+         */
+        self.isEnabledForUser = function(user, courseId, navOptions, admOptions) {
             return user.id != $mmSite.getUserId();
         };
 
@@ -64,9 +76,11 @@ angular.module('mm.addons.messages')
                         if (isContact) {
                             $scope.title = 'mma.messages.removecontact';
                             $scope.class = 'mma-messages-removecontact-handler';
+                            $scope.icon = 'ion-minus-round';
                         } else {
                             $scope.title = 'mma.messages.addcontact';
                             $scope.class = 'mma-messages-addcontact-handler';
+                            $scope.icon = 'ion-plus-round';
                         }
                     }).catch(function() {
                         // This fails for some reason, let's just hide the button.
@@ -84,7 +98,13 @@ angular.module('mm.addons.messages')
                     $scope.spinner = true;
                     $mmaMessages.isContact(user.id).then(function(isContact) {
                         if (isContact) {
-                            return $mmaMessages.removeContact(user.id);
+                            var template = $translate.instant('mma.messages.removecontactconfirm'),
+                                title = $translate.instant('mma.messages.removecontact');
+                            return $mmUtil.showConfirm(template, title, {okText: title}).then(function() {
+                                return $mmaMessages.removeContact(user.id);
+                            }).catch(function() {
+                                // Ignore on cancel.
+                            });
                         } else {
                             return $mmaMessages.addContact(user.id);
                         }
@@ -121,13 +141,24 @@ angular.module('mm.addons.messages')
      */
     self.blockContact = function() {
 
-        var self = {};
+        var self = {
+            type: mmUserProfileHandlersTypeAction
+        };
 
         self.isEnabled = function() {
             return $mmaMessages.isPluginEnabled();
         };
 
-        self.isEnabledForUser = function(user, courseId) {
+        /**
+         * Check if handler is enabled for this user in this context.
+         *
+         * @param {Object} user     User to check.
+         * @param {Number} courseId Course ID.
+         * @param  {Object} [navOptions] Course navigation options for current user. See $mmCourses#getUserNavigationOptions.
+         * @param  {Object} [admOptions] Course admin options for current user. See $mmCourses#getUserAdministrationOptions.
+         * @return {Promise}        Promise resolved with true if plugin is enabled, rejected or resolved with false otherwise.
+         */
+        self.isEnabledForUser = function(user, courseId, navOptions, admOptions) {
             return user.id != $mmSite.getUserId();
         };
 
@@ -148,9 +179,11 @@ angular.module('mm.addons.messages')
                         if (isBlocked) {
                             $scope.title = 'mma.messages.unblockcontact';
                             $scope.class = 'mma-messages-unblockcontact-handler';
+                            $scope.icon = 'ion-checkmark-circled';
                         } else {
                             $scope.title = 'mma.messages.blockcontact';
                             $scope.class = 'mma-messages-blockcontact-handler';
+                            $scope.icon = 'ion-close-circled';
                         }
                     }).catch(function() {
                         // This fails for some reason, let's just hide the button.
@@ -170,7 +203,13 @@ angular.module('mm.addons.messages')
                         if (isBlocked) {
                             return $mmaMessages.unblockContact(user.id);
                         } else {
-                            return $mmaMessages.blockContact(user.id);
+                            var template = $translate.instant('mma.messages.blockcontactconfirm'),
+                                title = $translate.instant('mma.messages.blockcontact');
+                            return $mmUtil.showConfirm(template, title, {okText: title}).then(function() {
+                                return $mmaMessages.blockContact(user.id);
+                            }).catch(function() {
+                                // Ignore on cancel.
+                            });
                         }
                     }).catch(function(error) {
                         $mmUtil.showErrorModal(error);
@@ -205,13 +244,24 @@ angular.module('mm.addons.messages')
      */
     self.sendMessage = function() {
 
-        var self = {};
+        var self = {
+            type: mmUserProfileHandlersTypeCommunication
+        };
 
         self.isEnabled = function() {
             return $mmaMessages.isPluginEnabled();
         };
 
-        self.isEnabledForUser = function(user, courseId) {
+        /**
+         * Check if handler is enabled for this user in this context.
+         *
+         * @param {Object} user     User to check.
+         * @param {Number} courseId Course ID.
+         * @param  {Object} [navOptions] Course navigation options for current user. See $mmCourses#getUserNavigationOptions.
+         * @param  {Object} [admOptions] Course admin options for current user. See $mmCourses#getUserAdministrationOptions.
+         * @return {Promise}        Promise resolved with true if plugin is enabled, rejected or resolved with false otherwise.
+         */
+        self.isEnabledForUser = function(user, courseId, navOptions, admOptions) {
             return user.id != $mmSite.getUserId();
         };
 
@@ -225,13 +275,15 @@ angular.module('mm.addons.messages')
              * @name $mmaMessagesHandlers#sendMessage:controller
              */
             return function($scope) {
-                $scope.title = 'mma.messages.sendmessage';
+                $scope.title = 'mma.messages.message';
                 $scope.class = 'mma-messages-sendmessage-handler';
+                $scope.icon = 'ion-chatbubble';
                 $scope.action = function($event) {
                     $event.preventDefault();
                     $event.stopPropagation();
                     $state.go('site.messages-discussion', {
-                        userId: user.id
+                        userId: user.id,
+                        showKeyboard: true
                     });
                 };
             };
@@ -343,7 +395,12 @@ angular.module('mm.addons.messages')
                                         stateParams = {userId: parseInt(params.user1, 10)};
                                     } else {
                                         // He isn't, open in browser.
-                                        $mmUtil.openInBrowser(url);
+                                        var modal = $mmUtil.showModalLoading();
+                                        $mmSitesManager.getSite(siteId).then(function(site) {
+                                            return site.openInBrowserWithAutoLogin(url);
+                                        }).finally(function() {
+                                            modal.dismiss();
+                                        });
                                         return;
                                     }
                                 } else if (typeof params.id != 'undefined') {
@@ -380,6 +437,94 @@ angular.module('mm.addons.messages')
             if (position > -1) {
                 return url.substr(0, position);
             }
+        };
+
+        return self;
+    };
+
+    /**
+     * Synchronization handler.
+     *
+     * @module mm.addons.messages
+     * @ngdoc method
+     * @name $mmaMessagesHandlers#syncHandler
+     */
+    self.syncHandler = function() {
+
+        var self = {};
+
+        /**
+         * Execute the process.
+         * Receives the ID of the site affected, undefined for all sites.
+         *
+         * @param  {String} [siteId] ID of the site affected, undefined for all sites.
+         * @return {Promise}         Promise resolved when done, rejected if failure.
+         */
+        self.execute = function(siteId) {
+            return $mmaMessagesSync.syncAllDiscussions(siteId);
+        };
+
+        /**
+         * Get the time between consecutive executions.
+         *
+         * @return {Number} Time between consecutive executions (in ms).
+         */
+        self.getInterval = function() {
+            return 300000; // 5 minutes.
+        };
+
+        /**
+         * Whether it's a synchronization process or not.
+         *
+         * @return {Boolean} True if is a sync process, false otherwise.
+         */
+        self.isSync = function() {
+            return true;
+        };
+
+        /**
+         * Whether the process uses network or not.
+         *
+         * @return {Boolean} True if uses network, false otherwise.
+         */
+        self.usesNetwork = function() {
+            return true;
+        };
+
+        return self;
+    };
+
+    /**
+     * Message preferences handler.
+     *
+     * @module mm.addons.messages
+     * @ngdoc method
+     * @name $mmaMessagesHandlers#preferences
+     */
+    self.preferences = function() {
+
+        var self = {};
+
+        /**
+         * Check if handler is enabled.
+         *
+         * @return {Boolean} True if handler is enabled, false otherwise.
+         */
+        self.isEnabled = function() {
+            return $mmaMessages.isMessagePreferencesEnabled();
+        };
+
+        /**
+         * Get the controller.
+         *
+         * @return {Object} Controller.
+         */
+        self.getController = function() {
+            return function($scope) {
+                $scope.title = 'mma.messages.messagepreferences';
+                $scope.class = 'mma-messages-messagepreferences-handler';
+                $scope.state = 'site.messages-preferences';
+            };
         };
 
         return self;

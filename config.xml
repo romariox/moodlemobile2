@@ -1,18 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<widget id="br.edu.fate.avamobile" version="3.1.2" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="br.edu.fate.avamobile" version="3.2.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
   <name>Fate AVA Mobile</name>
   <description>Aplicativo da plataforma AVA da Faculdade Ateneu.</description>
   <author href="http://fate.edu.br" email="suporte@fate.edu.br">Romário Rodrigues Ramos</author>
   <content src="index.html"/>
   <access origin="*"/>
-
-  <allow-navigation href="cdvfile:*" />
-  <allow-navigation href="content:*" />
-  <allow-navigation href="data:*" />
-  <allow-navigation href="*" />
-
-  <allow-intent href="*" />
-
+  <allow-navigation href="cdvfile:*"/>
+  <allow-navigation href="content:*"/>
+  <allow-navigation href="data:*"/>
+  <allow-navigation href="*"/>
+  <allow-intent href="*"/>
   <preference name="webviewbounce" value="false"/>
   <preference name="UIWebViewBounce" value="false"/>
   <preference name="DisallowOverscroll" value="true"/>

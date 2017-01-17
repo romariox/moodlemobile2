@@ -43,6 +43,9 @@ $mma-messages-date-badge: "stable" !default;
   }
 }
 
+.mma-messages-send-message-bar {
+  width: 100%;
+}
 .mm-site_messages-discussion {
   .list-left-editing .item-message.item-left-editable,
   .item-left-editing.item-message.item-left-editable {
@@ -79,4 +82,9 @@ $mma-messages-date-badge: "stable" !default;
     right: 0;
     left: initial;
   }
+}
+
+.mma-messages-showprevious-spinner-container {
+  width: 100%;
+  text-align: center;
 }
