@@ -9,6 +9,5 @@
     "errorloadingentries": "Ett fel uppstod vid inläsning av inläggen",
     "errorloadingentry": "Ett fel uppstod vid inläsning av inlägget",
     "errorloadingglossary": "Ett fel uppstod vid inläsning av ordboken",
-    "noentriesfound": "Inga inlägg hittades",
-    "searchquery": ""
+    "noentriesfound": "Inga inlägg hittades"
 }

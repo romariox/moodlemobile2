@@ -10,7 +10,7 @@
     "confirmdownload": "Möchten Sie wirklich {{size}} herunterladen?",
     "confirmdownloadsection": "Möchten Sie wirklich {{size}} herunterladen?",
     "confirmdownloadunknownsize": "Die Datenmenge kann nicht berechnet werden. Möchten Sie wirklich herunterladen?",
-    "confirmpartialdownloadsize": "Sie sind dabei, <strong>mindestens</ strong> {{size}} herunterzuladen. Sind Sie sicher, dass Sie fortfahren wollen?",
+    "confirmpartialdownloadsize": "Möchten Sie wirklich {{size}} herunterladen?",
     "contents": "Inhalte",
     "couldnotloadsectioncontent": "Die Abschnittsinhalte konnten nicht geladen werden. Versuchen Sie es später noch einmal.",
     "couldnotloadsections": "Die Abschnitte konnten nicht geladen werden. Versuchen Sie es später noch einmal.",
@@ -18,7 +18,6 @@
     "errorgetmodule": "Fehler beim Laden von Moduldaten",
     "gotothesite": "Zur Website",
     "nocontentavailable": "Aktuell sind keine Inhalte verfügbar",
-    "overriddennotice": "Die endgültige Bewertung zu dieser Aktivität wurde manuell bearbeitet.",
     "showall": "Alles anzeigen",
     "useactivityonbrowser": "Sie können dafür weiterhin den normalen Browser verwenden.",
     "whoops": "Whoops!"

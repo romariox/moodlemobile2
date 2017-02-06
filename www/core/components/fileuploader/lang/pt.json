@@ -1,5 +1,4 @@
 {
-    "addfiletext": "Adicionar ficheiro",
     "audio": "Áudio",
     "camera": "Câmera",
     "confirmuploadfile": "Está prestes a carregar {{size}}. Tem a certeza que quer continuar?",
@@ -13,7 +12,6 @@
     "errorwhileuploading": "Ocorreu um erro durante o carregamento do ficheiro.",
     "file": "Ficheiro",
     "fileuploaded": "Ficheiro carregado com sucesso",
-    "maxbytesfile": "O ficheiro {{$a.file}} é muito grande. Apenas pode carregar ficheiros com um tamanho máximo de {{$a.size}}.",
     "photoalbums": "Álbuns de fotos",
     "readingfile": "A ler ficheiro",
     "uploadafile": "Carregar um ficheiro",
