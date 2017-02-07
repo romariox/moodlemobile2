@@ -1,7 +1,7 @@
 {
     "app_id" : "br.edu.fate.avamobile",
     "appname": "Fate AVA Mobile",
-    "versioncode" : "2015",
+    "versioncode" : "2016",
     "versionname" : "3.2.0",
     "cache_expiration_time" : 300000,
     "default_lang" : "pt-br",
