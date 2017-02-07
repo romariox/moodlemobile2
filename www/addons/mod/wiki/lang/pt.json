@@ -8,7 +8,7 @@
     "nocontent": "Não há nenhum conteúdo nesta página",
     "notingroup": "Não está em nenhum grupo",
     "page": "Página",
-    "pageexists": "Esta página já existe.",
+    "pageexists": "Esta página já existe. A redirecionar para a mesma.",
     "pagename": "Nome da página",
     "wrongversionlock": "Outro participante editou esta página enquanto estava simultaneamente a editá-la e o seu conteúdo está desatualizado."
 }

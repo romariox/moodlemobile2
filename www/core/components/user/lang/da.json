@@ -1,11 +1,23 @@
 {
+    "address": "Adresse",
+    "city": "By",
     "contact": "Kontakt",
+    "country": "Land",
+    "description": "Beskrivelse",
     "details": "Detaljer",
     "detailsnotavailable": "Denne bruges detaljer er ikke tilgængelige for dig.",
     "editingteacher": "Lærer",
+    "email": "E-mail-adresse",
+    "emailagain": "E-mail (igen)",
+    "firstname": "Fornavn",
+    "interests": "Interesser",
     "invaliduser": "Ugyldig bruger.",
+    "lastname": "Efternavn",
     "manager": "Manager",
+    "newpicture": "Nyt billede",
     "phone2": "Mobil",
     "student": "Studerende",
-    "teacher": "Ikke redigerende lærer"
+    "teacher": "Ikke redigerende lærer",
+    "viewprofile": "Vis Profil",
+    "webpage": "Webside"
 }

@@ -1,6 +1,17 @@
 {
+    "choiceoptions": "Opzioni scelta",
     "errorgetchoice": "Si è verificato un errore durante la ricezione di dati della scelta.",
-    "numberofuser": "Numero di partecipanti",
+    "expired": "Spiacente, questa attività è stata chiusa il {{$a}} e non è più disponibile",
+    "full": "(Completo)",
+    "noresultsviewable": "I risultati non sono al momento visualizzabili.",
+    "notopenyet": "Spiacente, questa attività  non è disponibile fino al {{$a}}",
+    "numberofuser": "Numero di utenti",
     "numberofuserinpercentage": "Percentuale dei partecipanti",
-    "responsesresultgraphdescription": "Il {{number}}% ha scelto l'opzione {{text}}."
+    "removemychoice": "Elimina la mia scelta",
+    "responses": "Scelte",
+    "responsesresultgraphdescription": "Il {{number}}% ha scelto l'opzione {{text}}.",
+    "responsesresultgraphheader": "Visualizzazione grafico",
+    "savemychoice": "Salva la mia scelta",
+    "userchoosethisoption": "Gli utenti che hanno scelto questa opzione",
+    "yourselection": "La tua selezione"
 }

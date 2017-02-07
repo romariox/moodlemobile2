@@ -1,5 +1,13 @@
 {
+    "activities": "Aktivitäten",
+    "duedate": "Fälligkeitsdatum",
     "errornocompetenciesfound": "Keine Kompetenzen gefunden",
+    "evidence": "Evidenz",
     "mylearningplans": "Meine Lernpläne",
-    "nocompetencies": "Keine Kompetenzen"
+    "nocompetencies": "Keine Kompetenzen",
+    "path": "Pfad",
+    "progress": "Bearbeitungsstand",
+    "rating": "Bewertung",
+    "status": "Status",
+    "template": "Vorlage"
 }

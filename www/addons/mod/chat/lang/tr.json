@@ -2,6 +2,7 @@
     "beep": "biip",
     "currentusers": "Aktif kullanıcılar",
     "enterchat": "Şimdi sohbete katıl",
+    "entermessage": "Mesajınızı buraya girin",
     "messagebeepsyou": "{{$a}} size sesleniyor!",
     "messageenter": "{{$a}} odaya girdi",
     "messageexit": "{{$a}} odadan ayrıldı",

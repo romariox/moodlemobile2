@@ -1,11 +1,23 @@
 {
+    "address": "Adreça",
+    "city": "Població",
     "contact": "Contacte",
+    "country": "País",
+    "description": "Descripció",
     "details": "Detalls",
     "detailsnotavailable": "No tens accés als detalls d'aquest usuari.",
     "editingteacher": "Professor",
+    "email": "Adreça electrònica",
+    "emailagain": "Correu electrònic (una altra vegada)",
+    "firstname": "Nom",
+    "interests": "Interessos",
     "invaliduser": "L'usuari no és vàlid",
+    "lastname": "Cognoms",
     "manager": "Gestor",
+    "newpicture": "Nova imatge",
     "phone2": "Mòbil",
     "student": "Estudiant",
-    "teacher": "Professor no editor"
+    "teacher": "Professor no editor",
+    "viewprofile": "Mostra el perfil",
+    "webpage": "Pàgina web"
 }

@@ -1,5 +1,13 @@
 {
+    "activities": "活動",
+    "duedate": "規定繳交時間",
     "errornocompetenciesfound": "找不到能使用的功能",
+    "evidence": "證據",
     "mylearningplans": "我的學習計畫",
-    "nocompetencies": "沒有功能"
+    "nocompetencies": "沒有功能",
+    "path": "路徑",
+    "progress": "學生進度",
+    "rating": "評分",
+    "status": "狀態",
+    "template": "樣版"
 }

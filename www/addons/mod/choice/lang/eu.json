@@ -1,7 +1,18 @@
 {
+    "choiceoptions": "Kontsultaren aukerak",
     "errorgetchoice": "Errorea kontsultaren datuak eskuratzean.",
+    "expired": "Barkatu, jarduera hau {{$a}}(e)an itxi zen eta dagoeneko ez dago eskuragarri.",
+    "full": "(Beteta)",
+    "noresultsviewable": "Emaitzak ezin dira orain ikusi",
+    "notopenyet": "Barkatu, baina jarduera hau ez dago erabiltzeko moduan {{$a}} arte.",
     "numberofuser": "Partaide-kopurua",
-    "numberofuserinpercentage": "Partaideen ehunekoa",
+    "numberofuserinpercentage": "Partaide-kopurua ehunekotan",
+    "removemychoice": "Ezabatu nire aukera",
+    "responses": "Erantzunak",
     "responsesresultgraphdescription": "Erabiltzaileen %{{number}}-ak aukera hau aukeratu zuten: {{text}}.",
-    "resultsnotsynced": "Emaitzek ez dute zure azken erantzunak barne hartzen. Mesedez, sinkronizatu datuak eguneratzeko."
+    "responsesresultgraphheader": "Erakutsi grafikoa",
+    "resultsnotsynced": "Emaitzek ez dute zure azken erantzunak barne hartzen. Mesedez, sinkronizatu datuak eguneratzeko.",
+    "savemychoice": "Gorde nire aukera",
+    "userchoosethisoption": "Aukera hau hautatu duten erabiltzaileak",
+    "yourselection": "Zure aukera"
 }

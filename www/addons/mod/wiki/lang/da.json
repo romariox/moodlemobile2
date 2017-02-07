@@ -8,7 +8,7 @@
     "nocontent": "Der er intet indhold til denne side",
     "notingroup": "Ikke i gruppe",
     "page": "Side",
-    "pageexists": "Denne side findes allerede.",
+    "pageexists": "Denne side findes allerede. Du omdirigeres til siden.",
     "pagename": "Sidenavn",
     "wrongversionlock": "En anden bruger har redigeret denne side mens du redigerede og dit indhold er forældet."
 }

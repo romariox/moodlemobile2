@@ -1,11 +1,23 @@
 {
+    "address": "Dirección",
+    "city": "Ciudad",
     "contact": "Contacto",
+    "country": "País",
+    "description": "Descripción",
     "details": "Detalles",
     "detailsnotavailable": "Los detalles de este usuario no están disponibles para Usted.",
     "editingteacher": "Profesor",
+    "email": "Dirección Email",
+    "emailagain": "Correo (de nuevo)",
+    "firstname": "Nombre",
+    "interests": "Intereses",
     "invaliduser": "Usuario inválido.",
+    "lastname": "Apellido(s)",
     "manager": "Mánager",
+    "newpicture": "Imagen nueva",
     "phone2": "Móvil",
     "student": "Estudiante",
-    "teacher": "Profesor sin derechos de edición"
+    "teacher": "Profesor sin derechos de edición",
+    "viewprofile": "Ver perfil",
+    "webpage": "Página web"
 }

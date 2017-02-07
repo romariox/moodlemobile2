@@ -1,7 +1,18 @@
 {
+    "choiceoptions": "Opciones de la Consulta",
     "errorgetchoice": "Se ha producido un error recuperando los datos de la consulta.",
+    "expired": "Lo sentimos, esta actividad se cerró el {{$a}} y ya no está disponible",
+    "full": "(Lleno)",
+    "noresultsviewable": "Los resultados no pueden verse en este momento.",
+    "notopenyet": "Lo sentimos, esta actividad no estará disponible hasta {{$a}}",
     "numberofuser": "Número de participantes",
     "numberofuserinpercentage": "Porcentaje de participantes",
+    "removemychoice": "Eliminar mi elección",
+    "responses": "Respuestas",
     "responsesresultgraphdescription": "{{number}}% de los usuarios han escogido la opción: {{text}}.",
-    "resultsnotsynced": "Los resultados no incluyen su última respuesta. Por favor, sincronícelos para actualizarlos."
+    "responsesresultgraphheader": "Vista de gráfica",
+    "resultsnotsynced": "Los resultados no incluyen su última respuesta. Por favor, sincronícelos para actualizarlos.",
+    "savemychoice": "Guardar mi elección",
+    "userchoosethisoption": "Usuarios que eligieron esta opción",
+    "yourselection": "Su elección"
 }

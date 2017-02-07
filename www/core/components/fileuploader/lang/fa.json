@@ -1,6 +1,7 @@
 {
     "errorcapturingaudio": "خطا در ضبط صدا",
     "errorcapturingvideo": "خطا در ضبط ویدئو",
+    "errorreadingfile": "خطا در خواندن فایل «{{$a}}»",
     "file": "فایل",
     "fileuploaded": "فایل آپلود شده",
     "uploadafile": "قرار دادن یک فایل در سایت",

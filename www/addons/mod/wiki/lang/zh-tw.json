@@ -1,10 +1,21 @@
 {
+    "cannoteditpage": "你無法編輯此頁面",
+    "createpage": "新增頁面",
+    "editingpage": "編輯此頁\"{{$a}}\"",
     "errorloadingpage": "載入頁面時出錯",
     "errornowikiavailable": "這個維基詞條沒有內容",
     "gowikihome": "到維基百科",
+    "map": "頁面地圖",
+    "newpagehdr": "新增頁面",
+    "newpagetitle": "新頁面標題",
+    "nocontent": "本頁尚無內容",
+    "notingroup": "不在群體",
     "page": "分頁",
+    "pageexists": "此這頁面已存在，重導向至該頁面",
+    "pagename": "頁面名稱",
     "subwiki": "Subwiki",
     "titleshouldnotbeempty": "標題不能為空",
     "viewpage": "檢視頁面",
-    "wikipage": "維基頁面"
+    "wikipage": "維基頁面",
+    "wrongversionlock": "當你在編輯此頁時，另一用戶已經編輯完這一頁，你的內容是過時的。"
 }

@@ -1,11 +1,23 @@
 {
+    "address": "כתובת",
+    "city": "ישוב",
     "contact": "צור קשר",
+    "country": "ארץ",
+    "description": "תיאור",
     "details": "פרטים",
     "detailsnotavailable": "פרטי משתמש זה אינם זמינים לך.",
     "editingteacher": "מרצה",
+    "email": "כתובת דואר אלקטרוני",
+    "emailagain": "דואר אלקטרוני (שוב)",
+    "firstname": "שם פרטי",
+    "interests": "תחומי עניין",
     "invaliduser": "משתמש לא תקף.",
+    "lastname": "שם משפחה",
     "manager": "מנהל",
+    "newpicture": "תמונה חדשה",
     "phone2": "סלולרי",
     "student": "סטודנט",
-    "teacher": "עוזר/ת הוראה"
+    "teacher": "עוזר/ת הוראה",
+    "viewprofile": "תצוגת מאפיינים",
+    "webpage": "דף בית באינטרנט"
 }
